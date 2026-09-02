@@ -185,21 +185,24 @@ export default function SearchPage() {
 
         <div className="entity-list">
           {entities.map((entity) => (
-            <article className="entity-card" key={entity.id}>
-              <div className="entity-meta">
-                <span>{entity.type.replaceAll("_", " ")}</span>
-                <span>{entity.world.name}</span>
-              </div>
-              <h3>{entity.name}</h3>
-              <p>{entity.description || "No description has been added yet."}</p>
-              <div className="entity-tags">
-                {entity.tags.map((tag) => (
-                  <button type="button" key={tag} onClick={() => chooseTag(tag)}>
-                    #{tag}
-                  </button>
-                ))}
-              </div>
-            </article>
+            <Link
+              href={`/entities/${entity.id}`}
+              className="entity-card-link"
+              key={entity.id}
+            >
+              <article className="entity-card">
+                <div className="entity-meta">
+                  <span>{entity.type.replaceAll("_", " ")}</span>
+                  <span>{entity.world.name}</span>
+                </div>
+
+                <h3>{entity.name}</h3>
+
+                <p>
+                  {entity.description || "No description has been added yet."}
+                </p>
+              </article>
+            </Link>
           ))}
         </div>
       </section>

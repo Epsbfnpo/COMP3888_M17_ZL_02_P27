@@ -124,6 +124,161 @@ app.get('/api/entities/search', async (req, res) => {
   }
 });
 
+app.get('/api/entities/:id', async (req, res) => {
+  const entityId = Number(req.params.id);
+
+  // Check whether the id is valid
+  if (!Number.isInteger(entityId) || entityId <= 0) {
+    return res.status(400).json({ error: 'Invalid entity id' });
+  }
+
+  try {
+    const [entities] = await db.execute(
+      `SELECT
+        e.id,
+        e.name,
+        e.entity_type AS type,
+        e.description,
+        e.created_at,
+        e.updated_at,
+
+        w.id AS world_id,
+        w.name AS world_name,
+
+        u.id AS creator_id,
+        u.username AS creator_username,
+
+        GROUP_CONCAT(
+          DISTINCT t.name
+          ORDER BY t.name
+          SEPARATOR ','
+        ) AS tag_names
+
+      FROM entities e
+
+      JOIN worlds w
+        ON w.id = e.world_id
+
+      LEFT JOIN users u
+        ON u.id = e.created_by
+
+      LEFT JOIN entity_tags et
+        ON et.entity_id = e.id
+
+      LEFT JOIN tags t
+        ON t.id = et.tag_id
+
+      WHERE e.id = ?
+
+      GROUP BY
+        e.id,
+        e.name,
+        e.entity_type,
+        e.description,
+        e.created_at,
+        e.updated_at,
+        w.id,
+        w.name,
+        u.id,
+        u.username
+
+      LIMIT 1`,
+      [entityId]
+    );
+
+    if (entities.length === 0) {
+      return res.status(404).json({ error: 'Entity not found' });
+    }
+
+    const entity = entities[0];
+
+    // Fetch all relationships connected to this entity
+    const [relationships] = await db.execute(
+      `SELECT
+        r.id,
+        r.relationship_type,
+        r.description,
+
+        r.source_entity_id,
+        source.name AS source_name,
+        source.entity_type AS source_type,
+
+        r.target_entity_id,
+        target.name AS target_name,
+        target.entity_type AS target_type
+
+      FROM relationships r
+
+      JOIN entities source
+        ON source.id = r.source_entity_id
+
+      JOIN entities target
+        ON target.id = r.target_entity_id
+
+      WHERE r.source_entity_id = ?
+        OR r.target_entity_id = ?
+
+      ORDER BY r.created_at ASC`,
+      [entityId, entityId]
+    );
+
+    const formattedRelationships = relationships.map((relationship) => {
+      const isOutgoing = relationship.source_entity_id === entityId;
+
+      return {
+        id: relationship.id,
+        type: relationship.relationship_type,
+        description: relationship.description || '',
+        direction: isOutgoing ? 'outgoing' : 'incoming',
+
+        entity: isOutgoing
+          ? {
+              id: relationship.target_entity_id,
+              name: relationship.target_name,
+              type: relationship.target_type,
+            }
+          : {
+              id: relationship.source_entity_id,
+              name: relationship.source_name,
+              type: relationship.source_type,
+            },
+      };
+    });
+    return res.json({
+      entity: {
+        id: entity.id,
+        name: entity.name,
+        type: entity.type,
+        description: entity.description || '',
+        created_at: entity.created_at,
+        updated_at: entity.updated_at,
+
+        world: {
+          id: entity.world_id,
+          name: entity.world_name,
+        },
+
+        creator: entity.creator_id
+          ? {
+              id: entity.creator_id,
+              username: entity.creator_username,
+            }
+          : null,
+
+        tags: entity.tag_names
+          ? entity.tag_names.split(',')
+          : [],
+        relationships: formattedRelationships,
+      },
+    });
+  } catch (error) {
+    console.error('Could not fetch entity:', error.message);
+    return res.status(500).json({
+      error: 'Could not fetch entity',
+    });
+  }
+});
+
 app.post('/register', async (req, res) => {
   const body = req.body || {};
   const username = typeof body.username === 'string' ? body.username.trim() : '';
