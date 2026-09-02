@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+
+const API_URL = "http://localhost:3001";
 
 type Entity = {
   id: number;
@@ -9,408 +11,197 @@ type Entity = {
   type: string;
   description: string;
   tags: string[];
+  world: { id: number; name: string };
 };
 
-const sampleEntities: Entity[] = [
-  {
-    id: 1,
-    name: "Dragon King",
-    type: "Character",
-    description: "The ruler of the northern dragon kingdom.",
-    tags: ["Dragon", "King", "Fire"],
-  },
-  {
-    id: 2,
-    name: "Dragon Mountain",
-    type: "Location",
-    description: "A dangerous mountain inhabited by dragons.",
-    tags: ["Dragon", "Mountain", "Dangerous"],
-  },
-  {
-    id: 3,
-    name: "Silver Kingdom",
-    type: "Nation",
-    description: "A powerful kingdom in the western continent.",
-    tags: ["Kingdom", "Human", "Magic"],
-  },
-  {
-    id: 4,
-    name: "The Dragon War",
-    type: "Lore",
-    description: "A historical war between humans and dragons.",
-    tags: ["Dragon", "War", "History"],
-  },
-];
-
 export default function SearchPage() {
-  const router = useRouter();
-
   const [search, setSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [entities, setEntities] = useState<Entity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const allTags = Array.from(
-    new Set(sampleEntities.flatMap((entity) => entity.tags))
-  );
+  const runSearch = useCallback(async (query: string, tag = "") => {
+    setIsLoading(true);
+    setError("");
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query.trim());
+    if (tag) params.set("tag", tag);
 
-  const filteredEntities = sampleEntities.filter((entity) => {
-    const keyword = search.toLowerCase().trim();
-
-    const matchesSearch =
-      entity.name.toLowerCase().includes(keyword) ||
-      entity.description.toLowerCase().includes(keyword) ||
-      entity.type.toLowerCase().includes(keyword) ||
-      entity.tags.some((tag) =>
-        tag.toLowerCase().includes(keyword)
+    try {
+      const response = await fetch(
+        `${API_URL}/api/entities/search?${params.toString()}`
       );
+      const data = (await response.json()) as {
+        results?: Entity[];
+        error?: string;
+      };
+      if (!response.ok) {
+        throw new Error(data.error || "Could not search entities");
+      }
+      setEntities(data.results || []);
+    } catch (searchError) {
+      setEntities([]);
+      setError(
+        searchError instanceof Error
+          ? searchError.message
+          : "Could not search entities"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    const matchesTag =
-      selectedTag === "" || entity.tags.includes(selectedTag);
+  useEffect(() => {
+    const initialQuery = new URLSearchParams(window.location.search).get("q") || "";
+    queueMicrotask(() => {
+      setSearch(initialQuery);
+      void runSearch(initialQuery);
+    });
 
-    return matchesSearch && matchesTag;
-  });
+    async function loadTags() {
+      try {
+        const response = await fetch(`${API_URL}/api/tags`);
+        const data = (await response.json()) as {
+          tags?: string[];
+        };
+        if (response.ok) setAllTags(data.tags || []);
+      } catch {
+        setAllTags([]);
+      }
+    }
 
-  function openEntity(entity: Entity) {
-    router.push(`/entity/${entity.id}`);
+    void loadTags();
+
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+    };
+  }, [runSearch]);
+
+  function updateSearchUrl(query: string) {
+    window.history.replaceState(
+      null,
+      "",
+      query.trim() ? `/search?q=${encodeURIComponent(query.trim())}` : "/search"
+    );
   }
 
-  function selectTag(tag: string) {
-    setSelectedTag(selectedTag === tag ? "" : tag);
+  function scheduleSearch(query: string, tag: string) {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      updateSearchUrl(query);
+      void runSearch(query, tag);
+    }, 300);
+  }
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    scheduleSearch(value, selectedTag);
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    updateSearchUrl(search);
+    void runSearch(search, selectedTag);
+  }
+
+  function chooseTag(tag: string) {
+    const nextTag = selectedTag === tag ? "" : tag;
+    setSelectedTag(nextTag);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    void runSearch(search, nextTag);
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#f5f1e8",
-        color: "#1f2d24",
-      }}
-    >
-      {/* Header */}
-      <header
-        style={{
-          backgroundColor: "#294f39",
-          color: "#f5f1e8",
-          padding: "22px 8%",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              margin: 0,
-              fontFamily: "Georgia, serif",
-              fontSize: "26px",
-            }}
-          >
-            Worldbuilding
-          </h2>
-
-          <p
-            style={{
-              margin: "4px 0 0",
-              fontSize: "12px",
-              letterSpacing: "2px",
-              color: "#d8c28f",
-            }}
-          >
-            AI-ASSISTED COLLABORATIVE WORLDBUILDING
-          </p>
-        </div>
-
-        <button
-          onClick={() => router.push("/")}
-          style={{
-            border: "1px solid #d8c28f",
-            background: "transparent",
-            color: "#f5f1e8",
-            padding: "9px 18px",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Home
-        </button>
+    <main className="search-page">
+      <header className="search-header">
+        <Link href="/home" className="brand-link">
+          <strong>Worldbuilding</strong>
+          <span>Collaborative world atlas</span>
+        </Link>
+        <Link href="/home">Home</Link>
       </header>
 
-      <section
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-          padding: "55px 24px",
-        }}
-      >
-        {/* Title */}
-        <p
-          style={{
-            color: "#9c772d",
-            fontSize: "13px",
-            letterSpacing: "3px",
-            fontWeight: "bold",
-            marginBottom: "8px",
-          }}
-        >
-          EXPLORE THE WORLD
+      <section className="search-content">
+        <p className="eyebrow">Explore the world</p>
+        <h1>Search world entities</h1>
+        <p className="search-intro">
+          Discover characters, locations, nations and stories across every
+          shared world.
         </p>
 
-        <h1
-          style={{
-            fontFamily: "Georgia, serif",
-            fontSize: "44px",
-            margin: "0 0 12px",
-          }}
-        >
-          Search World Entities
-        </h1>
-
-        <p
-          style={{
-            color: "#66736a",
-            fontSize: "17px",
-            marginBottom: "32px",
-          }}
-        >
-          Discover characters, locations, nations and stories across the world.
-        </p>
-
-        {/* Search Bar */}
-        <div
-          style={{
-            position: "relative",
-            marginBottom: "35px",
-          }}
-        >
-          <span
-            style={{
-              position: "absolute",
-              left: "18px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              fontSize: "20px",
-            }}
-          >
-            🔍
-          </span>
-
+        <form className="search-form" onSubmit={handleSubmit} role="search">
+          <label className="sr-only" htmlFor="entity-search">Search entities</label>
           <input
-            type="text"
-            placeholder="Search characters, locations, lore or tags..."
+            id="entity-search"
+            type="search"
+            placeholder="Search characters, locations, lore or tags…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: "100%",
-              boxSizing: "border-box",
-              padding: "17px 20px 17px 52px",
-              fontSize: "16px",
-              border: "1px solid #cfc8b9",
-              borderRadius: "7px",
-              backgroundColor: "#fffdf7",
-              outline: "none",
-            }}
+            onChange={(event) => handleSearchChange(event.target.value)}
           />
-        </div>
+          <button type="submit">Search</button>
+        </form>
 
-        {/* Tags */}
-        <div style={{ marginBottom: "40px" }}>
-          <h3
-            style={{
-              fontFamily: "Georgia, serif",
-              fontSize: "22px",
-              marginBottom: "16px",
-            }}
-          >
-            Browse by Tag
-          </h3>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              flexWrap: "wrap",
-            }}
-          >
+        {allTags.length > 0 && (
+          <div className="tag-filter" aria-label="Filter by tag">
             <button
-              onClick={() => setSelectedTag("")}
-              style={{
-                padding: "9px 17px",
-                borderRadius: "20px",
-                cursor: "pointer",
-                border: "1px solid #345a43",
-                backgroundColor:
-                  selectedTag === "" ? "#345a43" : "transparent",
-                color:
-                  selectedTag === "" ? "#ffffff" : "#345a43",
-                fontWeight: "600",
-              }}
+              type="button"
+              className={selectedTag === "" ? "active" : ""}
+              onClick={() => chooseTag("")}
             >
               All
             </button>
-
             {allTags.map((tag) => (
               <button
+                type="button"
+                className={selectedTag === tag ? "active" : ""}
                 key={tag}
-                onClick={() => selectTag(tag)}
-                style={{
-                  padding: "9px 17px",
-                  borderRadius: "20px",
-                  cursor: "pointer",
-                  border: "1px solid #345a43",
-                  backgroundColor:
-                    selectedTag === tag
-                      ? "#345a43"
-                      : "transparent",
-                  color:
-                    selectedTag === tag
-                      ? "#ffffff"
-                      : "#345a43",
-                  fontWeight: "600",
-                }}
+                onClick={() => chooseTag(tag)}
               >
                 #{tag}
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Results */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "18px",
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: "Georgia, serif",
-              fontSize: "28px",
-              margin: 0,
-            }}
-          >
-            Search Results
-          </h2>
-
-          <span style={{ color: "#737c75" }}>
-            {filteredEntities.length} results
-          </span>
-        </div>
-
-        {/* No Result */}
-        {filteredEntities.length === 0 && (
-          <div
-            style={{
-              padding: "40px",
-              textAlign: "center",
-              border: "1px solid #d8d2c6",
-              borderRadius: "8px",
-              backgroundColor: "#fffdf7",
-            }}
-          >
-            <h3>No results found</h3>
-
-            <p style={{ color: "#737c75" }}>
-              Try another keyword or select a different tag.
-            </p>
-          </div>
         )}
 
-        {/* Entity Cards */}
-        {filteredEntities.map((entity) => (
-          <div
-            key={entity.id}
-            onClick={() => openEntity(entity)}
-            style={{
-              backgroundColor: "#fffdf7",
-              border: "1px solid #d8d2c6",
-              padding: "24px",
-              marginBottom: "16px",
-              borderRadius: "8px",
-              cursor: "pointer",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: "20px",
-              }}
-            >
-              <div>
-                <span
-                  style={{
-                    color: "#9c772d",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                    letterSpacing: "1.5px",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {entity.type}
-                </span>
+        <div className="results-heading">
+          <h2>Search results</h2>
+          {!isLoading && <span>{entities.length} results</span>}
+        </div>
 
-                <h3
-                  style={{
-                    fontFamily: "Georgia, serif",
-                    fontSize: "25px",
-                    margin: "6px 0 9px",
-                  }}
-                >
-                  {entity.name}
-                </h3>
+        {isLoading && <p className="status-panel">Searching entities…</p>}
+        {error && (
+          <p className="status-panel error" role="alert">
+            {error}. Make sure the backend is running and the worldbuilding
+            schema has been imported.
+          </p>
+        )}
+        {!isLoading && !error && entities.length === 0 && (
+          <p className="status-panel">No matching entities were found.</p>
+        )}
 
-                <p
-                  style={{
-                    color: "#66736a",
-                    margin: "0 0 17px",
-                    lineHeight: "1.6",
-                  }}
-                >
-                  {entity.description}
-                </p>
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "8px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {entity.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        selectTag(tag);
-                      }}
-                      style={{
-                        padding: "5px 10px",
-                        backgroundColor: "#edf0e9",
-                        color: "#345a43",
-                        borderRadius: "15px",
-                        fontSize: "13px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
+        <div className="entity-list">
+          {entities.map((entity) => (
+            <article className="entity-card" key={entity.id}>
+              <div className="entity-meta">
+                <span>{entity.type.replaceAll("_", " ")}</span>
+                <span>{entity.world.name}</span>
               </div>
-
-              <span
-                style={{
-                  color: "#345a43",
-                  fontSize: "24px",
-                }}
-              >
-                →
-              </span>
-            </div>
-          </div>
-        ))}
+              <h3>{entity.name}</h3>
+              <p>{entity.description || "No description has been added yet."}</p>
+              <div className="entity-tags">
+                {entity.tags.map((tag) => (
+                  <button type="button" key={tag} onClick={() => chooseTag(tag)}>
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   );

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const API_URL = "http://localhost:3001";
 
@@ -16,6 +17,7 @@ type LoginResult = {
 };
 
 export default function Home() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [result, setResult] = useState<LoginResult | null>(null);
@@ -36,6 +38,14 @@ export default function Home() {
 
       const data: LoginResult = await response.json();
       setResult(data);
+
+      if (response.ok && data.user) {
+        window.localStorage.setItem(
+          "worldbuilding-user",
+          JSON.stringify(data.user)
+        );
+        router.push("/home");
+      }
     } catch {
       setResult({
         error: "Cannot reach the backend. Make sure it is running on port 3001.",

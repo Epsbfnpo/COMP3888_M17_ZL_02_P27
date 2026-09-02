@@ -29,6 +29,101 @@ app.get('/users', async (req, res) => {
   }
 });
 
+app.get('/api/worlds', async (req, res) => {
+  try {
+    const [worlds] = await db.execute(`
+      SELECT
+        w.id,
+        w.name,
+        w.description,
+        w.updated_at,
+        u.id AS owner_id,
+        u.username AS owner_username,
+        COUNT(e.id) AS entity_count
+      FROM worlds w
+      JOIN users u ON u.id = w.owner_id
+      LEFT JOIN entities e ON e.world_id = w.id
+      GROUP BY
+        w.id,
+        w.name,
+        w.description,
+        w.updated_at,
+        u.id,
+        u.username
+      ORDER BY w.updated_at DESC
+    `);
+
+    return res.json({ worlds });
+  } catch (error) {
+    console.error('Could not fetch worlds:', error.message);
+    return res.status(500).json({ error: 'Could not fetch worlds' });
+  }
+});
+
+app.get('/api/tags', async (req, res) => {
+  try {
+    const [tags] = await db.execute(
+      'SELECT name FROM tags ORDER BY name ASC'
+    );
+    return res.json({ tags: tags.map((tag) => tag.name) });
+  } catch (error) {
+    console.error('Could not fetch tags:', error.message);
+    return res.status(500).json({ error: 'Could not fetch tags' });
+  }
+});
+
+app.get('/api/entities/search', async (req, res) => {
+  const query = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+  const tag = typeof req.query.tag === 'string' ? req.query.tag.trim() : '';
+
+  try {
+    const keyword = `%${query}%`;
+    const tagFilter = `%${tag}%`;
+    const [entities] = await db.execute(
+      `SELECT
+        e.id,
+        e.name,
+        e.entity_type AS type,
+        e.description,
+        w.id AS world_id,
+        w.name AS world_name,
+        GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ',') AS tag_names
+      FROM entities e
+      JOIN worlds w ON w.id = e.world_id
+      LEFT JOIN entity_tags et ON et.entity_id = e.id
+      LEFT JOIN tags t ON t.id = et.tag_id
+      WHERE
+        (? = '' OR e.name LIKE ? OR e.description LIKE ? OR e.entity_type LIKE ? OR t.name LIKE ? OR w.name LIKE ?)
+        AND (? = '' OR EXISTS (
+          SELECT 1
+          FROM entity_tags selected_et
+          JOIN tags selected_t ON selected_t.id = selected_et.tag_id
+          WHERE selected_et.entity_id = e.id AND selected_t.name LIKE ?
+        ))
+      GROUP BY e.id, e.name, e.entity_type, e.description, w.id, w.name
+      ORDER BY e.updated_at DESC, e.name ASC`,
+      [query, keyword, keyword, keyword, keyword, keyword, tag, tagFilter]
+    );
+
+    return res.json({
+      results: entities.map((entity) => ({
+        id: entity.id,
+        name: entity.name,
+        type: entity.type,
+        description: entity.description || '',
+        tags: entity.tag_names ? entity.tag_names.split(',') : [],
+        world: {
+          id: entity.world_id,
+          name: entity.world_name,
+        },
+      })),
+    });
+  } catch (error) {
+    console.error('Entity search failed:', error.message);
+    return res.status(500).json({ error: 'Could not search entities' });
+  }
+});
+
 app.post('/register', async (req, res) => {
   const body = req.body || {};
   const username = typeof body.username === 'string' ? body.username.trim() : '';
