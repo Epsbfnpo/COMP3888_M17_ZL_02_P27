@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const API_URL = "http://localhost:3001";
@@ -30,6 +30,15 @@ export default function ProfilePage() {
   const [myWorlds, setMyWorlds] = useState<World[]>([]);
   const [isLoadingWorlds, setIsLoadingWorlds] = useState(true);
   const [error, setError] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [editUsername, setEditUsername] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
     const storedUser = window.localStorage.getItem("worldbuilding-user");
@@ -44,6 +53,10 @@ export default function ProfilePage() {
     try {
       parsedUser = JSON.parse(storedUser) as StoredUser;
       setUser(parsedUser);
+      setEditUsername(parsedUser.username);
+      setEditEmail(parsedUser.email);
+
+
     } catch {
       window.localStorage.removeItem("worldbuilding-user");
       router.replace("/");
@@ -82,6 +95,71 @@ export default function ProfilePage() {
     void loadMyWorlds();
   }, [router]);
 
+  async function handleProfileUpdate(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    if (!user) {
+      return;
+    }
+
+    setSaveError("");
+    setSaveMessage("");
+    setIsSaving(true);
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/users/${user.id}/profile`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: editUsername,
+            email: editEmail,
+            password: currentPassword,
+          }),
+        }
+      );
+
+      const data = (await response.json()) as {
+        message?: string;
+        error?: string;
+        user?: StoredUser;
+      };
+
+      if (!response.ok || !data.user) {
+        throw new Error(
+          data.error || "Could not update profile"
+        );
+      }
+
+      setUser(data.user);
+
+      window.localStorage.setItem(
+        "worldbuilding-user",
+        JSON.stringify(data.user)
+      );
+
+      setEditUsername(data.user.username);
+      setEditEmail(data.user.email);
+      setCurrentPassword("");
+
+      setSaveMessage("Profile updated successfully.");
+      setIsEditing(false);
+    } catch (updateError) {
+      setSaveError(
+        updateError instanceof Error
+          ? updateError.message
+          : "Could not update profile"
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   function signOut() {
     window.localStorage.removeItem("worldbuilding-user");
     router.push("/");
@@ -114,10 +192,127 @@ export default function ProfilePage() {
 
           <div className="profile-summary-text">
             <p className="eyebrow">Worldbuilder profile</p>
+
             <h1>{user.username}</h1>
-            <p className="profile-email">{user.email}</p>
+
+            <p className="profile-email">
+              {user.email}
+            </p>
           </div>
+
+          <button
+            type="button"
+            className="edit-profile-button"
+            onClick={() => {
+              setEditUsername(user.username);
+              setEditEmail(user.email);
+              setCurrentPassword("");
+              setSaveError("");
+              setSaveMessage("");
+              setIsEditing(true);
+            }}
+          >
+            Edit Profile
+          </button>
         </section>
+
+        {isEditing && (
+          <section className="edit-profile-panel">
+            <div className="profile-section-heading">
+              <div>
+                <p className="step-label">Account settings</p>
+                <h2>Edit Profile</h2>
+              </div>
+            </div>
+
+            <form
+              className="edit-profile-form"
+              onSubmit={handleProfileUpdate}
+            >
+              <label htmlFor="edit-username">
+                Username
+              </label>
+
+              <input
+                id="edit-username"
+                type="text"
+                value={editUsername}
+                onChange={(event) =>
+                  setEditUsername(event.target.value)
+                }
+                maxLength={50}
+                required
+              />
+
+              <label htmlFor="edit-email">
+                Email
+              </label>
+
+              <input
+                id="edit-email"
+                type="email"
+                value={editEmail}
+                onChange={(event) =>
+                  setEditEmail(event.target.value)
+                }
+                maxLength={100}
+                required
+              />
+
+              <label htmlFor="current-password">
+                Current password
+              </label>
+
+              <input
+                id="current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(event) =>
+                  setCurrentPassword(event.target.value)
+                }
+                placeholder="Confirm your current password"
+                required
+              />
+
+              {saveError && (
+                <p className="message error" role="alert">
+                  {saveError}
+                </p>
+              )}
+
+              <div className="edit-profile-actions">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditUsername(user.username);
+                    setEditEmail(user.email);
+                    setCurrentPassword("");
+                    setSaveError("");
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                >
+                  {isSaving
+                    ? "Saving…"
+                    : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </section>
+        )}
+
+        {saveMessage && (
+          <p className="message success" role="status">
+            {saveMessage}
+          </p>
+        )}
 
         <section className="profile-info-grid">
           <article className="profile-info-card">
