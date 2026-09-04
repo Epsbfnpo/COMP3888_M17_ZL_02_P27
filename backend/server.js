@@ -372,6 +372,140 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
+app.put('/api/users/:id/profile', async (req, res) => {
+  const userId = Number(req.params.id);
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return res.status(400).json({
+      error: 'Invalid user id',
+    });
+  }
+
+  const body = req.body || {};
+
+  const username =
+    typeof body.username === 'string'
+      ? body.username.trim()
+      : '';
+
+  const email =
+    typeof body.email === 'string'
+      ? body.email.trim().toLowerCase()
+      : '';
+
+  const password =
+    typeof body.password === 'string'
+      ? body.password
+      : '';
+
+  if (!username || !email || !password) {
+    return res.status(400).json({
+      error: 'Username, email and current password are required',
+    });
+  }
+
+  if (username.length > 50 || email.length > 100) {
+    return res.status(400).json({
+      error: 'Username or email is too long',
+    });
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailPattern.test(email)) {
+    return res.status(400).json({
+      error: 'Please enter a valid email address',
+    });
+  }
+
+  try {
+    const [users] = await db.execute(
+      `SELECT
+        id,
+        username,
+        email,
+        password_hash,
+        created_at
+      FROM users
+      WHERE id = ?
+      LIMIT 1`,
+      [userId]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        error: 'User not found',
+      });
+    }
+
+    const user = users[0];
+
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user.password_hash
+    );
+
+    if (!passwordMatches) {
+      return res.status(401).json({
+        error: 'Current password is incorrect',
+      });
+    }
+
+    const [existingUsers] = await db.execute(
+      `SELECT id
+       FROM users
+       WHERE email = ?
+         AND id <> ?
+       LIMIT 1`,
+      [email, userId]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({
+        error: 'An account with this email already exists',
+      });
+    }
+
+    await db.execute(
+      `UPDATE users
+       SET username = ?, email = ?
+       WHERE id = ?`,
+      [username, email, userId]
+    );
+
+    const [updatedUsers] = await db.execute(
+      `SELECT
+        id,
+        username,
+        email,
+        created_at
+      FROM users
+      WHERE id = ?
+      LIMIT 1`,
+      [userId]
+    );
+
+    return res.json({
+      message: 'Profile updated successfully',
+      user: updatedUsers[0],
+    });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        error: 'An account with this email already exists',
+      });
+    }
+
+    console.error('Profile update failed:', error.message);
+
+    return res.status(500).json({
+      error: 'Profile update failed',
+    });
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Backend server is running at http://localhost:${port}`);
 });
