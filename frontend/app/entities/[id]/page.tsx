@@ -1,16 +1,19 @@
 "use client";
 
+import { apiFetch, api, API_URL } from "../../api";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
-const API_URL = "http://localhost:3001";
 
 type Entity = {
   id: number;
   name: string;
   type: string;
   description: string;
+  body?: { format: string; text: string };
+  allowedActions: { propose: boolean; edit: boolean };
   created_at: string;
   updated_at: string;
 
@@ -83,6 +86,18 @@ function getRelationshipLabel(
 
 export default function EntityPage() {
   const params = useParams();
+  const router = useRouter();
+  const [creating, setCreating] = useState(false);
+  const [proposalError, setProposalError] = useState("");
+  async function propose() {
+    setCreating(true);
+    try {
+      const context = await api<{ worldId: number; baseVersion: number; content: unknown }>(`/api/entities/${id}/edit-context`);
+      const result = await api<{ proposal: { id: number } }>(`/api/worlds/${context.worldId}/proposals`, "POST", { action: "edit", entityId: Number(id), baseVersion: context.baseVersion, content: context.content });
+      router.push(`/proposals/${result.proposal.id}`);
+    } catch (e) { setProposalError(e instanceof Error ? e.message : "Could not create draft"); }
+    finally { setCreating(false); }
+  }
   const id = params.id;
 
   const [entity, setEntity] = useState<Entity | null>(null);
@@ -92,7 +107,7 @@ export default function EntityPage() {
   useEffect(() => {
     async function loadEntity() {
       try {
-        const response = await fetch(`${API_URL}/api/entities/${id}`);
+        const response = await apiFetch(`${API_URL}/api/entities/${id}`);
 
         const data = (await response.json()) as {
           entity?: Entity;
@@ -168,6 +183,10 @@ export default function EntityPage() {
           {entity.description || "No description has been added yet."}
         </p>
 
+        {entity.body?.text && <p style={{ whiteSpace: "pre-wrap" }}>{entity.body.text}</p>}
+        {entity.allowedActions.propose && <button disabled={creating} onClick={propose}>Propose a change</button>}
+        {proposalError && <p role="alert">{proposalError}</p>}
+        <Link href={`/worlds/${entity.world.id}`}>World workspace</Link>
         <div className="entity-card">
             <div className="entity-meta">
                 <span>World</span>

@@ -1,10 +1,13 @@
 "use client";
 
+import { apiFetch, API_URL } from "./api";
+
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = "http://localhost:3001";
+const DEMO_EMAIL = "demo@example.com";
+const DEMO_PASSWORD = "Demo123!";
 
 type LoginResult = {
   message?: string;
@@ -25,13 +28,19 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  function useDemoAccount() {
+    setEmail(DEMO_EMAIL);
+    setPassword(DEMO_PASSWORD);
+    setResult(null);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
     setResult(null);
 
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await apiFetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -49,7 +58,7 @@ export default function Home() {
       }
     } catch {
       setResult({
-        error: "Cannot reach the backend. Make sure it is running on port 3001.",
+        error: "Cannot reach the backend. Please check that the server is running.",
       });
     } finally {
       setIsLoading(false);
@@ -146,8 +155,16 @@ export default function Home() {
         </div>
 
         <div className="demo-note">
-          <strong>Local test account</strong>
-          <span>sample@example.com / Sample123!</span>
+          <strong>Explore with a demo account</strong>
+          <span>Two created worlds and one world joined as an author.</span>
+          <span>{DEMO_EMAIL} / {DEMO_PASSWORD}</span>
+          <button
+            type="button"
+            className="demo-account-button"
+            onClick={useDemoAccount}
+          >
+            Use demo account
+          </button>
         </div>
       </section>
     </main>

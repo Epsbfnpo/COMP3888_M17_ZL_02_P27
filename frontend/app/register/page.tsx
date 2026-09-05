@@ -1,9 +1,10 @@
 "use client";
 
+import { apiFetch, API_URL } from "../api";
+
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
-const API_URL = "http://localhost:3001";
 
 type RegisterResult = {
   message?: string;
@@ -37,7 +38,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/register`, {
+      const response = await apiFetch(`${API_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +62,7 @@ export default function RegisterPage() {
     } catch {
       setResult({
         error:
-          "Cannot reach the backend. Make sure it is running on port 3001.",
+          "Cannot reach the backend. Please check that the server is running.",
       });
     } finally {
       setIsLoading(false);

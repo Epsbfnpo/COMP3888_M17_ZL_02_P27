@@ -1,10 +1,11 @@
 "use client";
 
+import { apiFetch, api, API_URL } from "../api";
+
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = "http://localhost:3001";
 
 type StoredUser = {
   id: number;
@@ -20,6 +21,8 @@ type World = {
   owner_id: number;
   owner_username: string;
   entity_count: number;
+  visibility: "public" | "private";
+  access_role: string | null;
 };
 
 export default function HomePage() {
@@ -29,27 +32,20 @@ export default function HomePage() {
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [worldName, setWorldName] = useState("");
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    const storedUser = window.localStorage.getItem("worldbuilding-user");
-
-    if (!storedUser) {
-      router.replace("/");
-      return;
-    }
-
-    try {
-      const parsedUser = JSON.parse(storedUser) as StoredUser;
-      queueMicrotask(() => setUser(parsedUser));
-    } catch {
-      window.localStorage.removeItem("worldbuilding-user");
-      router.replace("/");
-      return;
-    }
-
     async function loadWorlds() {
       try {
-        const response = await fetch(`${API_URL}/api/worlds`);
+        const sessionResponse = await apiFetch(`${API_URL}/auth/me`);
+        if (sessionResponse.ok) {
+          const session = await sessionResponse.json() as { user: StoredUser };
+          setUser(session.user);
+        } else if (sessionResponse.status !== 401) {
+          throw new Error('Could not check your session');
+        }
+        const response = await apiFetch(`${API_URL}/api/worlds`);
         const data = (await response.json()) as {
           worlds?: World[];
           error?: string;
@@ -82,21 +78,20 @@ export default function HomePage() {
     );
   }
 
-  function signOut() {
-    window.localStorage.removeItem("worldbuilding-user");
-    router.push("/");
-  }
-
-  if (!user) {
-    return <main className="app-loading">Loading your worldbuilding space…</main>;
+  async function signOut() {
+    try {
+      await api('/logout', 'POST');
+      window.localStorage.removeItem('worldbuilding-user');
+      router.push('/');
+    } catch { setError('Could not sign out. Please try again.'); }
   }
 
   return (
     <main className="home-page">
       <header className="home-header">
-        <Link className="user-link" href="/profile">
-          <span className="user-label">Signed in as</span>
-          <strong>{user.username}</strong>
+        <Link className="user-link" href={user ? "/profile" : "/"}>
+          <span className="user-label">{user ? "Signed in as" : "Public atlas"}</span>
+          <strong>{user?.username || "Sign in"}</strong>
         </Link>
 
         <form className="header-search" onSubmit={handleSearch} role="search">
@@ -123,6 +118,17 @@ export default function HomePage() {
       </section>
 
       <section className="world-section" aria-labelledby="worlds-title">
+        {user && <form onSubmit={event => {
+          event.preventDefault(); setCreating(true); setError('');
+          void api<{ world: { id: number } }>('/api/worlds', 'POST', { name: worldName })
+            .then(result => router.push(`/worlds/${result.world.id}`))
+            .catch(e => setError(e instanceof Error ? e.message : 'Could not create world'))
+            .finally(() => setCreating(false));
+        }}>
+          <label htmlFor="new-world">Create a private world</label>
+          <input id="new-world" maxLength={150} required value={worldName} onChange={e => setWorldName(e.target.value)} placeholder="World name" />
+          <button disabled={creating}>Create world</button>
+        </form>}
         <div className="section-heading-row">
           <div>
             <p className="step-label">Community library</p>
@@ -140,8 +146,7 @@ export default function HomePage() {
         )}
         {!isLoading && !error && worlds.length === 0 && (
           <p className="status-panel">
-            No worlds have been created yet. Add one to the database to see it
-            here.
+            No worlds are available to you yet.
           </p>
         )}
 
@@ -155,6 +160,8 @@ export default function HomePage() {
                 </span>
               </div>
               <h3>{world.name}</h3>
+              <span>{world.visibility} · {world.access_role || "visitor"}</span>
+              <Link href={`/worlds/${world.id}`}>Open world workspace</Link>
               <p>{world.description || "This world is waiting for its story."}</p>
               <footer>
                 <span>Created by {world.owner_username}</span>
@@ -169,9 +176,9 @@ export default function HomePage() {
 
       <footer className="home-footer">
         <span>AI-assisted collaborative worldbuilding</span>
-        <button type="button" onClick={signOut}>
+        {user && <button type="button" onClick={signOut}>
           Sign out
-        </button>
+        </button>}
       </footer>
     </main>
   );

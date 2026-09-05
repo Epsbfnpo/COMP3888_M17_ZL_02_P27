@@ -1,9 +1,10 @@
 "use client";
 
+import { apiFetch, API_URL } from "../api";
+
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
-const API_URL = "http://localhost:3001";
 
 type Entity = {
   id: number;
@@ -31,7 +32,7 @@ export default function SearchPage() {
     if (tag) params.set("tag", tag);
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `${API_URL}/api/entities/search?${params.toString()}`
       );
       const data = (await response.json()) as {
@@ -63,7 +64,7 @@ export default function SearchPage() {
 
     async function loadTags() {
       try {
-        const response = await fetch(`${API_URL}/api/tags`);
+        const response = await apiFetch(`${API_URL}/api/tags`);
         const data = (await response.json()) as {
           tags?: string[];
         };

@@ -1,10 +1,11 @@
 "use client";
 
+import { apiFetch, api, API_URL } from "../api";
+
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = "http://localhost:3001";
 
 type StoredUser = {
   id: number;
@@ -21,6 +22,7 @@ type World = {
   owner_id: number;
   owner_username: string;
   entity_count: number;
+  access_role: "owner" | "manager" | "author" | "reader";
 };
 
 export default function ProfilePage() {
@@ -28,6 +30,7 @@ export default function ProfilePage() {
 
   const [user, setUser] = useState<StoredUser | null>(null);
   const [myWorlds, setMyWorlds] = useState<World[]>([]);
+  const [managedWorlds, setManagedWorlds] = useState<World[]>([]);
   const [isLoadingWorlds, setIsLoadingWorlds] = useState(true);
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -41,31 +44,16 @@ export default function ProfilePage() {
   const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
-    const storedUser = window.localStorage.getItem("worldbuilding-user");
-
-    if (!storedUser) {
-      router.replace("/");
-      return;
-    }
-
-    let parsedUser: StoredUser;
-
-    try {
-      parsedUser = JSON.parse(storedUser) as StoredUser;
-      setUser(parsedUser);
-      setEditUsername(parsedUser.username);
-      setEditEmail(parsedUser.email);
-
-
-    } catch {
-      window.localStorage.removeItem("worldbuilding-user");
-      router.replace("/");
-      return;
-    }
-
     async function loadMyWorlds() {
       try {
-        const response = await fetch(`${API_URL}/api/worlds`);
+        const session = await api<{ user: StoredUser }>('/auth/me');
+        const parsedUser = session.user;
+        setUser(parsedUser);
+        setEditUsername(parsedUser.username); setEditEmail(parsedUser.email);
+        window.localStorage.setItem('worldbuilding-user', JSON.stringify(parsedUser));
+        const response = await apiFetch(
+          `${API_URL}/api/users/${parsedUser.id}/worlds`
+        );
 
         const data = (await response.json()) as {
           worlds?: World[];
@@ -76,11 +64,15 @@ export default function ProfilePage() {
           throw new Error(data.error || "Could not load worlds");
         }
 
-        const ownedWorlds = (data.worlds || []).filter(
-          (world) => Number(world.owner_id) === Number(parsedUser.id)
+        const accessibleWorlds = data.worlds || [];
+        setMyWorlds(
+          accessibleWorlds.filter((world) => world.access_role === "owner")
         );
-
-        setMyWorlds(ownedWorlds);
+        setManagedWorlds(
+          accessibleWorlds.filter(
+            (world) => world.access_role !== "owner"
+          )
+        );
       } catch (loadError) {
         setError(
           loadError instanceof Error
@@ -109,7 +101,7 @@ export default function ProfilePage() {
     setIsSaving(true);
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `${API_URL}/api/users/${user.id}/profile`,
         {
           method: "PUT",
@@ -160,13 +152,16 @@ export default function ProfilePage() {
     }
   }
 
-  function signOut() {
-    window.localStorage.removeItem("worldbuilding-user");
-    router.push("/");
+  async function signOut() {
+    try {
+      await api('/logout', 'POST');
+      window.localStorage.removeItem('worldbuilding-user');
+      router.push('/');
+    } catch { setError('Could not sign out. Please try again.'); }
   }
 
   if (!user) {
-    return <main className="app-loading">Loading profile…</main>;
+    return <main className="app-loading">{error ? <span>{error} <Link href="/">Sign in</Link></span> : "Loading profile…"}</main>;
   }
 
   const initial = user.username.charAt(0).toUpperCase();
@@ -333,6 +328,11 @@ export default function ProfilePage() {
             <span>Worlds owned</span>
             <strong>{myWorlds.length}</strong>
           </article>
+
+          <article className="profile-info-card">
+            <span>Joined worlds</span>
+            <strong>{managedWorlds.length}</strong>
+          </article>
         </section>
 
         <section className="profile-worlds">
@@ -392,6 +392,41 @@ export default function ProfilePage() {
             ))}
           </div>
         </section>
+
+        {managedWorlds.length > 0 && (
+          <section className="profile-worlds">
+            <div className="profile-section-heading">
+              <div>
+                <p className="step-label">Your memberships</p>
+                <h2>Joined Worlds</h2>
+              </div>
+            </div>
+
+            <div className="world-grid">
+              {managedWorlds.map((world) => (
+                <article className="world-card" key={world.id}>
+                  <div className="world-card-topline">
+                    <span>{Number(world.entity_count)} entities</span>
+                    <span>
+                      {new Date(world.updated_at).toLocaleDateString("en-AU")}
+                    </span>
+                  </div>
+                  <h3>{world.name}</h3>
+                  <p>
+                    {world.description ||
+                      "This world is waiting for its story."}
+                  </p>
+                  <footer>
+                    <span>Created by {world.owner_username}</span>
+                    <Link href={`/search?q=${encodeURIComponent(world.name)}`}>
+                      Explore →
+                    </Link>
+                  </footer>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="profile-back">
           <Link href="/home">← Back to home</Link>

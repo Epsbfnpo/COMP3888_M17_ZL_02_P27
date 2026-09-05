@@ -388,8 +388,19 @@ body {
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
+}
+
+textarea, select {
+  max-width: 100%;
+  padding: 12px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
 }
 
 .page-shell {
@@ -650,6 +661,20 @@ button:disabled {
 
 .demo-note strong {
   color: var(--ink);
+}
+
+.demo-account-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px 14px;
+  color: var(--forest);
+  background: transparent;
+  border: 1px solid var(--forest);
+}
+
+.demo-account-button:hover:not(:disabled) {
+  color: #fff;
+  background: var(--forest);
 }
 
 @media (max-width: 820px) {
