@@ -187,7 +187,7 @@ export default function SearchPage() {
         <div className="entity-list">
           {entities.map((entity) => (
             <Link
-              href={`/entities/${entity.id}`}
+              href={`/entities/${entity.id}?from=search`}
               className="entity-card-link"
               key={entity.id}
             >

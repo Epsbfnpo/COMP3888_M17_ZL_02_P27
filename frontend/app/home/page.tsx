@@ -165,7 +165,7 @@ export default function HomePage() {
               <p>{world.description || "This world is waiting for its story."}</p>
               <footer>
                 <span>Created by {world.owner_username}</span>
-                <Link href={`/search?q=${encodeURIComponent(world.name)}`}>
+                <Link href={`/worlds/${world.id}`}>
                   Explore →
                 </Link>
               </footer>

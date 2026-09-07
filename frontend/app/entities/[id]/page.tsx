@@ -4,7 +4,7 @@ import { apiFetch, api, API_URL } from "../../api";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 
 type Entity = {
@@ -87,6 +87,8 @@ function getRelationshipLabel(
 export default function EntityPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
   const [creating, setCreating] = useState(false);
   const [proposalError, setProposalError] = useState("");
   async function propose() {
@@ -167,9 +169,18 @@ export default function EntityPage() {
       </header>
 
       <section className="search-content">
+      {from === "world" ? (
+        <Link
+          href={`/worlds/${entity.world.id}`}
+          className="entity-back-link"
+        >
+          ← Back to {entity.world.name}
+        </Link>
+      ) : (
         <Link href="/search" className="entity-back-link">
-            ← Back to search
-         </Link>
+          ← Back to search
+        </Link>
+      )}
 
         <div className="entity-title-block">
             <p className="eyebrow">
@@ -186,7 +197,11 @@ export default function EntityPage() {
         {entity.body?.text && <p style={{ whiteSpace: "pre-wrap" }}>{entity.body.text}</p>}
         {entity.allowedActions.propose && <button disabled={creating} onClick={propose}>Propose a change</button>}
         {proposalError && <p role="alert">{proposalError}</p>}
-        <Link href={`/worlds/${entity.world.id}`}>World workspace</Link>
+        <Link
+          href={`/worlds/${entity.world.id}/workspace?from=entity&entityId=${entity.id}`}
+        >
+          World workspace
+        </Link>
         <div className="entity-card">
             <div className="entity-meta">
                 <span>World</span>
@@ -226,7 +241,7 @@ export default function EntityPage() {
 
                     return (
                         <Link
-                        href={`/entities/${relationship.entity.id}`}
+                        href={`/entities/${relationship.entity.id}?from=${from || "search"}`}
                         className="relationship-card"
                         key={relationship.id}
                         >

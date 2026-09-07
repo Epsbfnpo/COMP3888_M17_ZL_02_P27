@@ -1018,3 +1018,225 @@ button:disabled {
     width: 100%;
   }
 }
+
+
+/* ============================= */
+/* World page */
+/* ============================= */
+
+.world-overview {
+  margin-top: 1.5rem;
+}
+
+.world-overview h1 {
+  margin-top: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.world-overview .status-panel {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+}
+
+.world-overview .status-panel h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+
+/* ============================= */
+/* World entities */
+/* ============================= */
+
+.world-entities {
+  margin-top: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+.world-entities .section-heading-row {
+  margin-bottom: 1rem;
+}
+
+.world-entities .world-grid {
+  margin-top: 1.25rem;
+  gap: 1.25rem;
+}
+
+.world-entities .world-card {
+  padding: 1.5rem;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.world-entities .world-card h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.world-entities .world-card p {
+  margin-top: 0;
+}
+
+.world-entities .world-card footer {
+  margin-top: auto;
+  padding-top: 1.5rem;
+}
+
+
+/* ============================= */
+/* World management */
+/* ============================= */
+
+.world-management {
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(40, 50, 45, 0.25);
+}
+
+.world-management > h2 {
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.world-management > .status-panel {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* Management actions */
+
+.management-actions {
+  margin: 1.5rem 0;
+}
+
+.management-actions button {
+  padding: 0.9rem 1.4rem;
+}
+
+/* Proposal / Member cards */
+
+.management-card {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(40, 50, 45, 0.15);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.management-card h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.management-card p {
+  margin: 0.5rem 0;
+}
+
+
+/* Member form */
+
+.management-card form {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.management-card form label {
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.management-card form input,
+.management-card form select {
+  width: 100%;
+}
+
+.management-card form button {
+  margin-top: 1rem;
+}
+
+/* Responsive */
+
+@media (max-width: 800px) {
+  .world-entities .world-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .world-management {
+    margin-top: 2.5rem;
+  }
+}
+
+.world-overview .status-panel h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.8rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(40, 50, 45, 0.15);
+  color: #1f2a24;
+}
+
+.world-badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.world-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(40, 50, 45, 0.25);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.world-workspace-link {
+  margin-top: 3rem;
+  padding: 1.75rem 2rem;
+  border: 1px solid rgba(40, 50, 45, 0.15);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.35);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.world-workspace-link h2 {
+  margin: 0.35rem 0 0.5rem;
+  font-size: 1.6rem;
+}
+
+.world-workspace-link p {
+  margin-bottom: 0;
+}
+
+.workspace-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.8rem 1.2rem;
+  border: 1px solid rgba(40, 50, 45, 0.3);
+  border-radius: 10px;
+
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.workspace-button:hover {
+  background: rgba(40, 50, 45, 0.08);
+}
+
+@media (max-width: 800px) {
+  .world-workspace-link {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
