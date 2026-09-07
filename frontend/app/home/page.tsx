@@ -160,8 +160,14 @@ export default function HomePage() {
                 </span>
               </div>
               <h3>{world.name}</h3>
-              <span>{world.visibility} · {world.access_role || "visitor"}</span>
-              <Link href={`/worlds/${world.id}`}>Open world workspace</Link>
+              <div className="world-badges">
+                <span className="world-badge">
+                  {world.visibility}
+                </span>
+                <span className="world-badge">
+                  {world.access_role || "visitor"}
+                </span>
+              </div>
               <p>{world.description || "This world is waiting for its story."}</p>
               <footer>
                 <span>Created by {world.owner_username}</span>
