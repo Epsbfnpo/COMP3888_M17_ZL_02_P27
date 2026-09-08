@@ -1,6 +1,7 @@
 "use client";
 
 import { apiFetch, api, API_URL } from "../../api";
+import EntityForm, { type EntityContent } from "../../entity-form";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -13,7 +14,8 @@ type Entity = {
   type: string;
   description: string;
   body?: { format: string; text: string };
-  allowedActions: { propose: boolean; edit: boolean };
+  allowedActions: { propose: boolean; edit: boolean; manageEntities: boolean };
+  version: number;
   created_at: string;
   updated_at: string;
 
@@ -105,6 +107,34 @@ export default function EntityPage() {
   const [entity, setEntity] = useState<Entity | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [saved, setSaved] = useState("");
+
+  async function saveEntity(content: EntityContent) {
+    if (!entity) return;
+    const result = await api<{ entity: { version: number } }>(`/api/entities/${entity.id}`, "PATCH", {
+      baseVersion: entity.version, content,
+    });
+    setEntity({ ...entity, name: content.name, type: content.entityType,
+      description: content.description, body: content.body, version: result.entity.version });
+    setEditing(false);
+    setSaved("Entity published.");
+  }
+
+  async function deleteEntity() {
+    if (!entity || deleting || !window.confirm(`Delete entity “${entity.name}”? It will be removed from this world.`)) return;
+    setDeleting(true);
+    setActionError("");
+    try {
+      await api(`/api/entities/${entity.id}`, "DELETE", { baseVersion: entity.version });
+      router.push(`/worlds/${entity.world.id}`);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Could not delete entity");
+      setDeleting(false);
+    }
+  }
 
   useEffect(() => {
     async function loadEntity() {
@@ -195,7 +225,23 @@ export default function EntityPage() {
         </p>
 
         {entity.body?.text && <p style={{ whiteSpace: "pre-wrap" }}>{entity.body.text}</p>}
-        {entity.allowedActions.propose && <button disabled={creating} onClick={propose}>Propose a change</button>}
+        {entity.allowedActions.manageEntities && (
+          <section className="management-card">
+            {editing ? <EntityForm
+              initial={{ name: entity.name, entityType: entity.type, description: entity.description || '',
+                body: { format: 'markdown', text: entity.body?.text || '' } }}
+              onSave={saveEntity}
+              onCancel={() => setEditing(false)}
+            /> : <>
+              <button disabled={deleting} onClick={() => { setEditing(true); setSaved(''); setActionError(''); }}>Edit entity</button>
+              {' '}
+              <button disabled={deleting} onClick={() => void deleteEntity()}>{deleting ? 'Deleting…' : 'Delete entity'}</button>
+            </>}
+            {actionError && <p role="alert" className="message error">{actionError}</p>}
+            {saved && <p role="status">{saved}</p>}
+          </section>
+        )}
+        {!entity.allowedActions.manageEntities && entity.allowedActions.propose && <button disabled={creating} onClick={propose}>Propose a change</button>}
         {proposalError && <p role="alert">{proposalError}</p>}
         <Link
           href={`/worlds/${entity.world.id}/workspace?from=entity&entityId=${entity.id}`}

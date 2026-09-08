@@ -1231,6 +1231,138 @@ button:disabled {
   white-space: nowrap;
 }
 
+.workspace-draft-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.workspace-draft-row > a {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--forest);
+}
+
+.workspace-draft-delete {
+  margin: 0;
+  padding: 7px 12px;
+  background: transparent;
+  color: #8d2f2b;
+  border: 1px solid #d9aaaa;
+  font-size: 0.82rem;
+}
+
+.workspace-draft-delete:hover:not(:disabled) {
+  background: #f7e7e3;
+  transform: none;
+}
+
+.member-search {
+  position: relative;
+  min-width: 0;
+}
+
+.member-search-results {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(23, 52, 38, 0.12);
+}
+
+.member-search-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.member-search-option:hover,
+.member-search-option[aria-selected="true"] {
+  background: #e7ede4;
+}
+
+.member-search-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e2e7dc;
+  color: var(--forest);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.member-search-identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 3px;
+  overflow-wrap: anywhere;
+}
+
+.member-search-identity strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.member-search-identity > span,
+.management-card .member-search-hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.management-card .member-search-hint {
+  margin: 0;
+}
+
+.member-search-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid #cbd8c9;
+  border-radius: 8px;
+  background: #edf2e9;
+}
+
+.management-card form .member-search-change {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 6px;
+  color: var(--forest);
+  background: transparent;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.management-card form .member-search-change:hover:not(:disabled) {
+  background: transparent;
+  transform: none;
+  color: var(--forest-dark);
+}
+
 .workspace-button:hover {
   background: rgba(40, 50, 45, 0.08);
 }
