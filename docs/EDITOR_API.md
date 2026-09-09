@@ -11,6 +11,7 @@ Authenticate with `POST /login`. Send `credentials: 'include'` and JSON for writ
 | GET | /api/entities/:id/edit-context | Returns entityId, worldId, baseVersion, content, allowedActions |
 | POST | /api/worlds/:worldId/proposals | Create draft: action, content, entityId/baseVersion for edit or delete |
 | GET | /api/proposals/:id | Returns `{ proposal }` |
+| DELETE | /api/proposals/:id | Permanently delete your own draft: `{ revision }`; returns `{ message }` |
 | PATCH | /api/proposals/:id | Save draft: revision, full content, baseVersion |
 | POST | /api/proposals/:id/submit | `{ revision }` |
 | POST | /api/proposals/:id/withdraw | `{ revision }` |
@@ -56,6 +57,7 @@ On HTTP 409:
 - Base-version conflict: reload edit-context, compare published content, and save resolved content with its baseVersion. Withdraw pending proposals first.
 
 Drafts are private to their author. Managers can view submitted proposals. Removed members lose proposal access.
+Only the author with current world membership can delete a draft, using its latest revision. Pending, approved and rejected proposals cannot be deleted. Withdraw a pending proposal before deleting it. The workspace separates submitted proposals from your private drafts.
 
 ## Errors and integration
 

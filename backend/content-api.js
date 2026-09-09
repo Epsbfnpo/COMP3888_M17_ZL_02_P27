@@ -58,6 +58,20 @@ router.post('/api/worlds/:id/transfer', async (req,res) => {
     await c.execute("INSERT INTO world_members (world_id,user_id,role,status) VALUES (?,?,'manager','approved') ON DUPLICATE KEY UPDATE role='manager',status='approved'",[w.id,req.user.id]);
   }); res.json({message:'Ownership transferred'});
 });
+router.get('/api/worlds/:id/member-candidates',async(req,res)=>{
+  loginRequired(req);
+  const w=await access(db,req.params.id,req.user,managers);
+  const q=typeof req.query.q==='string'?req.query.q.trim().toLowerCase():'';
+  if(q.length<3||q.length>100) fail(400,'Enter between 3 and 100 characters of an email');
+  // Escape LIKE wildcards so the supplied email prefix is treated literally.
+  const prefix=q.replace(/[!%_]/g,'!$&')+'%';
+  const [users]=await db.execute(`SELECT u.id,u.username,u.email FROM users u
+    WHERE u.email LIKE ? ESCAPE '!' AND u.id<>? AND u.id<>?
+    AND (?='owner' OR NOT EXISTS (SELECT 1 FROM world_members wm
+      WHERE wm.world_id=? AND wm.user_id=u.id AND wm.role='manager'))
+    ORDER BY u.email,u.id LIMIT 10`,[prefix,w.owner_id,req.user.id,w.role,w.id]);
+  res.json({users});
+});
 router.get('/api/worlds/:id/members',async(req,res)=>{
   await access(db,req.params.id,req.user,managers);
   const [members]=await db.execute('SELECT wm.*,u.username FROM world_members wm JOIN users u ON u.id=wm.user_id WHERE world_id=?',[id(req.params.id)]);

@@ -11,6 +11,7 @@ type World = {
   description?: string | null;
   visibility: string;
   role: string | null;
+  allowedActions: { manageWorld: boolean };
 };
 
 type Entity = {
@@ -30,6 +31,11 @@ export default function WorldPage() {
   const [world, setWorld] = useState<World | null>(null);
   const [entities, setEntities] = useState<Entity[]>([]);
   const [error, setError] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [description, setDescription] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -62,6 +68,25 @@ export default function WorldPage() {
 
     void load();
   }, [id]);
+
+  async function saveDescription() {
+    if (!world || isSaving) return;
+    setIsSaving(true);
+    setSaveError("");
+    setSaveMessage("");
+    try {
+      await api(`/api/worlds/${world.id}`, "PATCH", { description });
+      setWorld(current => current?.id === world.id
+        ? { ...current, description }
+        : current);
+      setIsEditing(false);
+      setSaveMessage("Description saved.");
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Could not save description");
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   return (
     <main className="search-page">
@@ -96,10 +121,55 @@ export default function WorldPage() {
               <div className="status-panel">
                 <h2>About this world</h2>
 
-                <p>
-                  {world.description ||
-                    "This world is waiting for its story."}
-                </p>
+                {isEditing && world.allowedActions.manageWorld ? (
+                  <form onSubmit={event => {
+                    event.preventDefault();
+                    void saveDescription();
+                  }}>
+                    <label htmlFor="world-description">World description</label>
+                    <textarea
+                      id="world-description"
+                      rows={6}
+                      value={description}
+                      disabled={isSaving}
+                      onChange={event => setDescription(event.target.value)}
+                    />
+                    {saveError && <p className="message error" role="alert">{saveError}</p>}
+                    <div className="edit-profile-actions">
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        disabled={isSaving}
+                        onClick={() => {
+                          setIsEditing(false);
+                          setSaveError("");
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button type="submit" disabled={isSaving}>
+                        {isSaving ? "Saving…" : "Save changes"}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <p style={{ whiteSpace: "pre-wrap" }}>
+                      {world.description || "This world is waiting for its story."}
+                    </p>
+                    {world.allowedActions.manageWorld && (
+                      <button type="button" onClick={() => {
+                        setDescription(world.description || "");
+                        setSaveError("");
+                        setSaveMessage("");
+                        setIsEditing(true);
+                      }}>
+                        Edit description
+                      </button>
+                    )}
+                  </>
+                )}
+                {saveMessage && <p role="status">{saveMessage}</p>}
               </div>
             </section>
 

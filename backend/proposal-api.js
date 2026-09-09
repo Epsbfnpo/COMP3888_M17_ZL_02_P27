@@ -42,7 +42,7 @@ async function publish(c,p,actor) {
       [p.world_id,v.entityType,v.name,v.description,JSON.stringify(v.body),p.contributor_id]);entityId=r.insertId;
   } else {
     const e=await entity(c,entityId,p.world_id);
-    if(e.version!==p.base_version) fail(409,'Published entity changed; withdraw and rebase the proposal');
+    if(e.version!==p.base_version) fail(409,'Published entity changed; reload the latest content and resolve your changes');
     await snapshot(c,e,actor);
     if(p.action_type==='delete') {
       await c.execute('UPDATE entities SET deleted_at=NOW(),version=version+1 WHERE id=?',[e.id]);
@@ -86,6 +86,15 @@ router.get('/api/worlds/:worldId/proposals',async(req,res)=>{
   res.json({proposals:rows.map(dto)});
 });
 router.get('/api/proposals/:id',async(req,res)=>res.json({proposal:dto((await proposal(db,req)).p)}));
+router.delete('/api/proposals/:id',async(req,res)=>{
+  await transaction(async c=>{
+    const {p}=await proposal(c,req,true);
+    if(p.contributor_id!==req.user.id) fail(403,'Only the author can delete this draft');
+    if(p.status!=='draft') fail(409,'Only drafts can be deleted; withdraw pending proposals first');
+    checkRevision(req,p);
+    await c.execute('DELETE FROM contributions WHERE id=?',[p.id]);
+  });res.json({message:'Draft deleted'});
+});
 router.patch('/api/proposals/:id',async(req,res)=>{
   const result=await transaction(async c=>{
     const {p,w}=await proposal(c,req,true);
@@ -126,6 +135,25 @@ router.post('/api/proposals/:id/review',async(req,res)=>{
       [target,decision==='approve'?'approved':'rejected',req.user.id,comment,p.id]);
     const [[updated]]=await c.execute('SELECT * FROM contributions WHERE id=?',[p.id]);return dto(updated);
   });res.json({proposal:result});
+});
+router.post('/api/worlds/:worldId/entities',async(req,res)=>{
+  loginRequired(req);
+  const result=await transaction(async c=>{
+    const w=await access(c,req.params.worldId,req.user,['owner'],true);
+    const entityId=await publish(c,{world_id:w.id,action_type:'create',
+      contributor_id:req.user.id,proposed_content:content(req.body.content)},req.user.id);
+    return {id:entityId,version:1};
+  });res.status(201).json({entity:result});
+});
+router.delete('/api/entities/:id',async(req,res)=>{
+  loginRequired(req);
+  await transaction(async c=>{
+    const [[e]]=await c.execute('SELECT world_id FROM entities WHERE id=? AND deleted_at IS NULL',[id(req.params.id)]);
+    if(!e) fail(404,'Entity not found');
+    await access(c,e.world_id,req.user,['owner'],true);
+    await publish(c,{world_id:e.world_id,entity_id:id(req.params.id),
+      base_version:id(req.body.baseVersion),action_type:'delete',proposed_content:{}},req.user.id);
+  });res.json({message:'Entity deleted'});
 });
 router.patch('/api/entities/:id',async(req,res)=>{
   loginRequired(req);

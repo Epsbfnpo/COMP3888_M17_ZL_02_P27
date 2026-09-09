@@ -49,6 +49,7 @@ const writers = ['owner', 'manager', 'author'];
 const managers = ['owner', 'manager'];
 function actions(role) {
   return { propose: writers.includes(role), edit: managers.includes(role), review: managers.includes(role),
+    manageEntities: role === 'owner',
     manageMembers: managers.includes(role), manageWorld: role === 'owner' };
 }
 async function transaction(work) {
