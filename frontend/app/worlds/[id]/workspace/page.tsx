@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { api, apiFetch, API_URL } from "../../../api";
 import EntityForm from "../../../entity-form";
+import ProposalStatus from "../../../proposal-status";
 
 type World = {
   id: number;
@@ -237,13 +238,23 @@ export default function WorldWorkspace() {
               )}
 
               {world.allowedActions.manageEntities && (
-                <section className="management-card">
-                  <h2>Entities</h2>
-                  {entities.map(entity => <p key={entity.id}>
-                    <Link href={`/entities/${entity.id}?from=world`}>{entity.name}</Link>
-                  </p>)}
+                <section className="management-card workspace-entities">
+                  <div className="workspace-entities-heading"><div><p className="workflow-eyebrow">World content</p><h2>Entities</h2></div>
+                    <span className="workflow-badge">{entities.length} {entities.length===1?'entity':'entities'}</span></div>
+                  <p className="workspace-entities-intro">Explore and manage the people, places and ideas in this world.</p>
+                  {entities.length===0 ? <div className="workspace-entities-empty">No entities yet. Create the first piece of your world below.</div> :
+                    <ul className="workspace-entity-list">{entities.map(entity => <li key={entity.id}>
+                      <Link className="workspace-entity-row" href={`/entities/${entity.id}?from=world`}>
+                        <span className="workspace-entity-icon" aria-hidden="true">{entity.name.slice(0,1).toUpperCase()}</span>
+                        <span className="workspace-entity-summary"><strong>{entity.name}</strong>
+                          <span>{entity.description || 'No description yet.'}</span></span>
+                        <span className="workflow-badge">{entity.type.replaceAll('_',' ')}</span>
+                        <span className="workspace-entity-open">View <span aria-hidden="true">→</span></span>
+                      </Link>
+                    </li>)}</ul>}
                   {creatingEntity ? <EntityForm
-                    initial={{ name: '', entityType: 'other', description: '', body: { format: 'markdown', text: '' } }}
+                    worldId={world.id}
+                    initial={{ name: '', entityType: 'other', description: '', body: { format: 'markdown', text: '' }, outgoingRelationships: [] }}
                     onCancel={() => setCreatingEntity(false)}
                     onSave={async content => {
                       const result = await api<{ entity: { id: number } }>(`/api/worlds/${id}/entities`, 'POST', { content });
@@ -298,19 +309,20 @@ export default function WorldWorkspace() {
                     <p>No proposals yet.</p>
                   ) : (
                     submittedProposals.map(p => (
-                      <p key={p.id}>
-                        <Link href={`/proposals/${p.id}`}>
-                          {p.content.name || `Proposal #${p.id}`}
-                          {" · "}{p.action}{" · "}{p.status}
+                      <div className="proposal-list-item" key={p.id}>
+                        <Link className="proposal-list-link" href={`/proposals/${p.id}`}>
+                          <span className="proposal-list-title"><strong>{p.content.name || `Proposal #${p.id}`}</strong><small>#{p.id} · {p.action} proposal · Revision {p.revision}</small></span>
+                          <ProposalStatus status={p.status}/>
+                          <span className="proposal-open">Open proposal <span aria-hidden="true">→</span></span>
                         </Link>
-                      </p>
+                      </div>
                     ))
                   )}
                 </section>
                 <section className="management-card">
-                  <h2>Your drafts</h2>
-                  <p>Private drafts you have not submitted. Deleting a draft cannot be undone.</p>
-                  {drafts.length === 0 ? <p>No drafts yet.</p> : drafts.map(p => (
+                  <div className="workspace-section-heading"><div><p className="workflow-eyebrow">Your private space</p><h2>Your drafts</h2></div><span className="workflow-badge">{drafts.length} drafts</span></div>
+                  <p className="workspace-section-description">Only you can see your unsubmitted drafts. Draft deletion is permanent.</p>
+                  {drafts.length === 0 ? <div className="workspace-empty-state"><span className="workspace-empty-icon" aria-hidden="true">✎</span><div><strong>No drafts yet</strong><p>Your saved proposals will appear here before you submit them for review.</p></div></div> : drafts.map(p => (
                     <div className="workspace-draft-row" key={p.id}>
                       <Link href={`/proposals/${p.id}`}>
                         {p.content.name || `Draft #${p.id}`} · {p.action}
@@ -335,18 +347,20 @@ export default function WorldWorkspace() {
               {/* Members */}
               {world.allowedActions.manageMembers && (
                 <section className="management-card">
-                  <h2>Members</h2>
+                  <div className="workspace-section-heading"><div><p className="workflow-eyebrow">World collaboration</p><h2>Members</h2></div><span className="workflow-badge">{members.length} members</span></div>
 
                   <p>
                     Search by email and select a registered user to add or update membership.
                     The owner is managed separately.
                   </p>
 
-                  {members.map(m => (
-                    <p key={m.user_id}>
-                      #{m.user_id} {m.username} · {m.role} · {m.status}
-                    </p>
-                  ))}
+                  <ul className="workspace-member-list">{members.map(m => (
+                    <li key={m.user_id}>
+                      <span className="member-avatar" aria-hidden="true">{m.username.slice(0,1).toUpperCase()}</span>
+                      <div className="member-identity"><strong>{m.username}</strong><small>Member #{m.user_id}</small></div>
+                      <span className="member-role-badge">{m.role}</span><span className={`workflow-badge status-${m.status}`}>{m.status}</span>
+                    </li>
+                  ))}</ul>
 
                   <form
                     onSubmit={e => {

@@ -14,7 +14,7 @@ type Entity = {
   type: string;
   description: string;
   body?: { format: string; text: string };
-  allowedActions: { propose: boolean; edit: boolean; manageEntities: boolean };
+  allowedActions: { propose: boolean; edit: boolean; manageEntities: boolean; viewHistory: boolean };
   version: number;
   created_at: string;
   updated_at: string;
@@ -36,6 +36,7 @@ type Entity = {
     type: string;
     description: string;
     direction: "incoming" | "outgoing";
+    reverseName?: string | null;
 
     entity: {
         id: number;
@@ -46,47 +47,16 @@ type Entity = {
 
 };
 
-function getRelationshipLabel(
-  type: string,
-  direction: "incoming" | "outgoing"
-) {
-  const labels: Record<string, { outgoing: string; incoming: string }> = {
-    OWNS: {
-      outgoing: "OWNS",
-      incoming: "OWNED BY",
-    },
-
-    BELONGS_TO: {
-      outgoing: "BELONGS TO",
-      incoming: "HAS",
-    },
-
-    RULES: {
-      outgoing: "RULES",
-      incoming: "RULED BY",
-    },
-
-    LOCATED_IN: {
-      outgoing: "LOCATED IN",
-      incoming: "CONTAINS",
-    },
-
-    PARENT_OF: {
-      outgoing: "PARENT OF",
-      incoming: "CHILD OF",
-    },
-  };
-
-  const relationship = labels[type];
-
-  if (relationship) {
-    return relationship[direction];
-  }
-
-  return type.replaceAll("_", " ");
+function getRelationshipLabel(type: string, direction: "incoming" | "outgoing", reverseName?: string | null) {
+  return direction === 'outgoing' ? type : reverseName || `${type} → this entity`;
 }
 
 export default function EntityPage() {
+  const params = useParams();
+  return <EntityDetail key={String(params.id)} />;
+}
+
+function EntityDetail() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -111,16 +81,27 @@ export default function EntityPage() {
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState("");
   const [saved, setSaved] = useState("");
+  const [editContent, setEditContent] = useState<EntityContent | null>(null);
+
+  async function startEditing() {
+    setActionError(''); setSaved('');
+    try {
+      const context = await api<{content: EntityContent; baseVersion: number}>(`/api/entities/${id}/edit-context`);
+      setEditContent(context.content);
+      setEntity(current => current ? {...current, version: context.baseVersion} : current);
+      setEditing(true);
+    } catch (e) { setActionError(e instanceof Error ? e.message : 'Could not load edit context'); }
+  }
 
   async function saveEntity(content: EntityContent) {
     if (!entity) return;
-    const result = await api<{ entity: { version: number } }>(`/api/entities/${entity.id}`, "PATCH", {
+    await api<{ entity: { version: number } }>(`/api/entities/${entity.id}`, "PATCH", {
       baseVersion: entity.version, content,
     });
-    setEntity({ ...entity, name: content.name, type: content.entityType,
-      description: content.description, body: content.body, version: result.entity.version });
     setEditing(false);
     setSaved("Entity published.");
+    const result = await api<{entity: Entity}>(`/api/entities/${entity.id}`);
+    setEntity(result.entity);
   }
 
   async function deleteEntity() {
@@ -183,6 +164,7 @@ export default function EntityPage() {
         </p>
 
         <Link href="/search">Back to search</Link>
+        <p><Link className="ui-action-link" href={`/entities/${id}/history`}>Check version history (members only)</Link></p>
       </main>
     );
   }
@@ -224,30 +206,28 @@ export default function EntityPage() {
           {entity.description || "No description has been added yet."}
         </p>
 
+        {entity.allowedActions.viewHistory && <div className="entity-history-entry"><div><strong>Version history</strong><span>Current version: v{entity.version} · Browse earlier content and recorded relationships.</span></div><Link className="ui-action-link history-entry-button" href={`/entities/${entity.id}/history`}><span aria-hidden="true">↶</span> View version history</Link></div>}
         {entity.body?.text && <p style={{ whiteSpace: "pre-wrap" }}>{entity.body.text}</p>}
+        <section className="entity-actions-panel" aria-label="Entity actions">
+          <div className="entity-actions-heading"><div><p className="workflow-eyebrow">Workspace tools</p><h2>Entity actions</h2></div><Link className="ui-action-link" href={`/worlds/${entity.world.id}/workspace?from=entity&entityId=${entity.id}`}>World workspace <span aria-hidden="true">→</span></Link></div>
         {entity.allowedActions.manageEntities && (
-          <section className="management-card">
-            {editing ? <EntityForm
-              initial={{ name: entity.name, entityType: entity.type, description: entity.description || '',
-                body: { format: 'markdown', text: entity.body?.text || '' } }}
+          <div className="entity-edit-controls">
+            {editing && editContent ? <EntityForm
+              worldId={entity.world.id} entityId={entity.id}
+              initial={editContent}
               onSave={saveEntity}
               onCancel={() => setEditing(false)}
-            /> : <>
-              <button disabled={deleting} onClick={() => { setEditing(true); setSaved(''); setActionError(''); }}>Edit entity</button>
-              {' '}
-              <button disabled={deleting} onClick={() => void deleteEntity()}>{deleting ? 'Deleting…' : 'Delete entity'}</button>
-            </>}
+            /> : <div className="entity-action-buttons">
+              <button disabled={deleting} onClick={() => void startEditing()}>Edit entity</button>
+              <button className="danger-outline-button" disabled={deleting} onClick={() => void deleteEntity()}>{deleting ? 'Deleting…' : 'Delete entity'}</button>
+            </div>}
             {actionError && <p role="alert" className="message error">{actionError}</p>}
             {saved && <p role="status">{saved}</p>}
-          </section>
+          </div>
         )}
         {!entity.allowedActions.manageEntities && entity.allowedActions.propose && <button disabled={creating} onClick={propose}>Propose a change</button>}
         {proposalError && <p role="alert">{proposalError}</p>}
-        <Link
-          href={`/worlds/${entity.world.id}/workspace?from=entity&entityId=${entity.id}`}
-        >
-          World workspace
-        </Link>
+        </section>
         <div className="entity-card">
             <div className="entity-meta">
                 <span>World</span>
@@ -282,7 +262,8 @@ export default function EntityPage() {
                     {entity.relationships.map((relationship) => {
                     const relationshipLabel = getRelationshipLabel(
                         relationship.type,
-                        relationship.direction
+                        relationship.direction,
+                        relationship.reverseName
                     );
 
                     return (
@@ -297,6 +278,8 @@ export default function EntityPage() {
                             </span>
 
                             <h3>{relationship.entity.name}</h3>
+                            <p>{relationship.reverseName ? 'Two-way relationship' : 'One-way relationship'}{relationship.direction === 'incoming' ? ` · Managed from ${relationship.entity.name}` : ''}</p>
+                            {relationship.description && <p>{relationship.description}</p>}
 
                             <span className="relationship-entity-type">
                             {relationship.entity.type.replaceAll("_", " ")}

@@ -1,15 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import RelationshipEditor, { type OutgoingRelationship } from './relationship-editor';
 
 export type EntityContent = {
   name: string;
   entityType: string;
   description: string;
   body: { format: "markdown"; text: string };
+  outgoingRelationships?: OutgoingRelationship[];
 };
 
-export default function EntityForm({ initial, onSave, onCancel }: {
+export default function EntityForm({ initial, onSave, onCancel, worldId, entityId }: {
+  worldId: number;
+  entityId?: number;
   initial: EntityContent;
   onSave: (content: EntityContent) => Promise<void>;
   onCancel: () => void;
@@ -41,6 +45,8 @@ export default function EntityForm({ initial, onSave, onCancel }: {
     <label htmlFor="entity-body">Body (Markdown)</label>
     <textarea id="entity-body" rows={12} maxLength={200000} disabled={busy} value={value.body.text}
       onChange={e => setValue({ ...value, body: { format: 'markdown', text: e.target.value } })} />
+    <RelationshipEditor worldId={worldId} entityId={entityId} value={value.outgoingRelationships}
+      disabled={busy} onChange={outgoingRelationships => setValue({ ...value, outgoingRelationships })} />
     {error && <p className="message error" role="alert">{error}</p>}
     <div className="edit-profile-actions">
       <button type="button" className="secondary-button" disabled={busy} onClick={onCancel}>Cancel</button>

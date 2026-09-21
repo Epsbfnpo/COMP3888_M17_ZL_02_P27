@@ -48,7 +48,8 @@ async function access(conn, worldId, user, roles, lock = false) {
 const writers = ['owner', 'manager', 'author'];
 const managers = ['owner', 'manager'];
 function actions(role) {
-  return { propose: writers.includes(role), edit: managers.includes(role), review: managers.includes(role),
+  return { propose: writers.includes(role), edit: role === 'owner', review: managers.includes(role),
+    viewHistory: writers.includes(role), rollback: managers.includes(role),
     manageEntities: role === 'owner',
     manageMembers: managers.includes(role), manageWorld: role === 'owner' };
 }

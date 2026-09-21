@@ -123,6 +123,6 @@ router.get('/api/entities/:id',async(req,res)=>{
     FROM relationships r JOIN entities s ON s.id=r.source_entity_id JOIN entities t ON t.id=r.target_entity_id
     WHERE (r.source_entity_id=? OR r.target_entity_id=?) AND r.world_id=? AND s.world_id=? AND t.world_id=? AND s.deleted_at IS NULL AND t.deleted_at IS NULL`,[e.id,e.id,w.id,w.id,w.id]);
   res.json({entity:{...e,type:e.entity_type,world:{id:w.id,name:w.name},creator:e.created_by?{id:e.created_by,username:e.creator_username}:null,
-    tags:tags.map(t=>t.name),allowedActions:actions(w.role),relationships:rels.map(r=>{const out=r.source_entity_id===e.id;return {id:r.id,type:r.relationship_type,description:r.description,direction:out?'outgoing':'incoming',entity:{id:out?r.target_entity_id:r.source_entity_id,name:out?r.target_name:r.source_name,type:out?r.target_type:r.source_type}};})}});
+    tags:tags.map(t=>t.name),allowedActions:actions(w.role),relationships:rels.map(r=>{const out=r.source_entity_id===e.id;return {id:r.id,type:r.relationship_type,reverseName:r.reverse_name??null,sourceEntityId:r.source_entity_id,description:r.description,direction:out?'outgoing':'incoming',entity:{id:out?r.target_entity_id:r.source_entity_id,name:out?r.target_name:r.source_name,type:out?r.target_type:r.source_type}};})}});
 });
 module.exports=router;

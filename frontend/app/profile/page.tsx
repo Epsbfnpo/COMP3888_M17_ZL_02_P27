@@ -383,7 +383,7 @@ export default function ProfilePage() {
                   <span>Owned by you</span>
 
                   <Link
-                    href={`/search?q=${encodeURIComponent(world.name)}`}
+                    href={`/worlds/${world.id}`}
                   >
                     Explore →
                   </Link>
@@ -418,7 +418,7 @@ export default function ProfilePage() {
                   </p>
                   <footer>
                     <span>Created by {world.owner_username}</span>
-                    <Link href={`/search?q=${encodeURIComponent(world.name)}`}>
+                    <Link href={`/worlds/${world.id}`}>
                       Explore →
                     </Link>
                   </footer>

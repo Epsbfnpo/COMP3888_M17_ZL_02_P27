@@ -768,6 +768,8 @@ button:disabled {
   text-transform: uppercase;
 }
 
+.relationship-card > div { min-width: 0; overflow-wrap: anywhere; }
+.relationship-card { min-width: 0; }
 .relationship-card h3 {
   margin: 0 0 4px;
   font-size: 1.05rem;
@@ -1365,6 +1367,308 @@ button:disabled {
 
 .workspace-button:hover {
   background: rgba(40, 50, 45, 0.08);
+}
+
+/* Shared proposal, history and relationship editing layout. */
+.relationship-search { position: relative; }
+.relationship-search-menu {
+  position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 6px);
+  border: 1px solid #c7d2c4; border-radius: 12px; background: #fffef9;
+  box-shadow: 0 12px 32px #1d382526; overflow: hidden;
+}
+.relationship-search-caption { padding: 12px 16px; border-bottom: 1px solid #e1e5dc; color: #627065; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.relationship-search-menu > p { padding: 12px 16px; font-size: 14px; }
+.relationship-search-menu ul { list-style: none; margin: 0; padding: 5px; max-height: 280px; overflow-y: auto; }
+.relationship-search-menu li { display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px; border-radius: 8px; cursor: pointer; }
+.relationship-search-menu li:is(:hover,.is-active) { background: #eaf0e7; }
+.relationship-target-icon, .workspace-entity-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; background: #e6ede1; border: 1px solid #d4dece; border-radius: 10px; color: #36583e; font-family: Georgia,serif; font-size: 22px; }
+.relationship-target-label { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.relationship-target-label strong { font-size: 14px; }
+.relationship-target-label small { font-size: 12px; color: #657366; }
+.relationship-target-add { margin-left: auto; font-size: 22px; color: #486c50; }
+.relationship-editor .relationship-search-help { font-size: 12px; margin-top: 8px; }
+.workspace-entities-heading { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.workspace-entities-heading h2 { margin-bottom: 0; }
+.workspace-entities .workflow-eyebrow { font-size: 11px; font-weight: 700; color: #657361; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 6px; }
+.workspace-entities .workspace-entities-intro { color: #657366; font-size: 14px; margin: 12px 0 22px; }
+.workspace-entity-list { list-style: none; margin: 0 0 24px; padding: 0; border: 1px solid #d4dbcf; border-radius: 12px; overflow: hidden; }
+.workspace-entity-list li + li { border-top: 1px solid #dce2d6; }
+.workspace-entity-row { display: flex; align-items: center; gap: 16px; padding: 18px; background: #fafaf3; color: inherit; text-decoration: none; }
+.workspace-entity-row:hover { background: #edf2e8; }
+.workspace-entity-row:focus-visible { outline: 3px solid #ad793a; outline-offset: -3px; }
+.workspace-entity-summary { display: grid; gap: 5px; flex: 1; min-width: 0; }
+.workspace-entity-summary strong { font-size: 17px; overflow-wrap: anywhere; }
+.workspace-entity-summary > span { font-size: 13px; color: #687368; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-entity-open { color: #365b41; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.workspace-entities-empty { margin: 20px 0; padding: 24px; border: 1px dashed #bfcdb9; border-radius: 10px; color: #657366; text-align: center; }
+@media (max-width: 600px) {
+  .workspace-entity-row { flex-wrap: wrap; gap: 10px; padding: 14px; }
+  .workspace-entity-summary { flex-basis: calc(100% - 54px); }
+  .workspace-entity-row > .workflow-badge { margin-left: 50px; }
+  .workspace-entity-open { margin-left: auto; }
+}
+.workflow-page {
+  max-width: 1080px;
+  line-height: 1.6;
+}
+.workflow-nav,
+.workflow-actions,
+.history-toolbar,
+.history-restore {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.workflow-nav { margin-bottom: 30px; font-size: 14px; }
+.workflow-nav a { display: inline-flex; align-items: center; min-height: 42px; padding: 10px 16px; border: 1px solid #aabcae; border-radius: 10px; background: #fafbf5; color: #315746; font-weight: 600; text-decoration: none; }
+.workflow-nav a:hover { background: #e5eddf; border-color: #315746; }
+.workflow-heading { margin-bottom: 28px; }
+
+/* Entity navigation, action groups and snapshot presentation. */
+a.entity-back-link { display: inline-flex; align-items: center; max-width: 100%; gap: 8px; padding: 10px 15px; margin: 0 0 24px; border: 1px solid #bfccba; border-radius: 10px; background: #f8f9f2; color: #34553d; font-size: 14px; font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+a.entity-back-link:hover { background: #e8efdf; border-color: #809779; }
+.entity-actions-panel { padding: 24px; margin: 28px 0; border: 1px solid #c8d1bf; border-radius: 16px; background: #f8f8f0; }
+.entity-actions-heading, .workspace-section-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.entity-actions-heading h2, .workspace-section-heading h2 { margin: 0; font-size: 22px; font-weight: 650; color: #243e30; }
+.entity-actions-heading .workflow-eyebrow, .workspace-section-heading .workflow-eyebrow { margin: 0 0 7px; color: #65725f; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
+.entity-action-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; padding-top: 20px; border-top: 1px solid #dce1d3; }
+.entity-action-buttons button { margin: 0; min-height: 44px; border-radius: 9px; }
+button.danger-outline-button { background: #fff7f4; color: #963e36; border: 1px solid #c68f85; }
+button.danger-outline-button:hover:not(:disabled) { background: #f8e4df; color: #7e2823; }
+.entity-actions-panel > button { margin-top: 20px; }
+.snapshot-text-section { margin-top: 22px; padding: 20px 24px; border: 1px solid #dbe0d2; border-radius: 12px; background: #fcfcf7; }
+.history-snapshot .snapshot-text-section h3 { margin: 0 0 12px; }
+.snapshot-text-section > p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; color: #34473b; }
+.snapshot-relationships { display: grid; gap: 12px; list-style: none; margin: 16px 0 0; padding: 0; }
+.snapshot-relationships > li { padding: 18px 22px; border: 1px solid #cdd7c4; border-left: 4px solid #7d9874; border-radius: 12px; background: #f8faf2; }
+.snapshot-relation-path { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; color: #294332; overflow-wrap: anywhere; }
+.snapshot-relation-path + .snapshot-relation-path { margin-top: 10px; }
+.snapshot-relation-path strong { font-size: 15px; min-width: 0; }
+.snapshot-relation-label { border: 1px solid #c8d6bc; border-radius: 7px; background: #e8efdf; padding: 5px 10px; font-size: 12px; font-weight: 650; overflow-wrap: anywhere; max-width: 100%; }
+.snapshot-relation-note { margin: 12px 0 0; font-size: 14px; color: #61705c; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.workspace-section-description { color: #62715c; font-size: 14px; line-height: 1.65; }
+.workspace-empty-state { display: flex; align-items: center; gap: 16px; margin-top: 20px; padding: 22px; border: 1px dashed #bccbb1; border-radius: 12px; background: #f9faf4; }
+.workspace-empty-icon, .member-avatar { display: grid; place-items: center; flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; background: #e5ecdd; color: #3b6142; font-size: 21px; }
+.workspace-empty-state strong { color: #304b35; font-size: 15px; }
+.workspace-empty-state p { margin: 6px 0 0; font-size: 14px; color: #64715e; line-height: 1.6; }
+.workspace-member-list { list-style: none; margin: 22px 0 26px; padding: 0; border: 1px solid #d0d9c7; border-radius: 12px; overflow: hidden; background: #fafbf5; }
+.workspace-member-list li { display: flex; align-items: center; gap: 14px; padding: 16px 18px; }
+.workspace-member-list li + li { border-top: 1px solid #e0e6d8; }
+.member-identity { display: grid; gap: 5px; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.member-identity strong { font-size: 15px; color: #304734; }
+.member-identity small { font-size: 12px; color: #708069; }
+.member-role-badge { padding: 5px 10px; border: 1px solid #c5cfbd; border-radius: 7px; color: #52654a; font-size: 12px; text-transform: capitalize; }
+a.entity-back-link:focus-visible, .entity-actions-panel :is(button,a):focus-visible { outline: 3px solid #ad793a; outline-offset: 3px; }
+@media(max-width:600px) {
+  .entity-actions-panel { padding: 18px; }
+  .entity-actions-heading > .ui-action-link { width: 100%; }
+  .entity-action-buttons button { flex: 1 1 130px; }
+  .snapshot-text-section, .snapshot-relationships > li { padding: 16px; }
+  .workspace-member-list li { flex-wrap: wrap; gap: 10px; padding: 14px; }
+  .member-identity { flex-basis: calc(100% - 56px); }
+  .workspace-empty-state { padding: 16px; align-items: flex-start; }
+}
+.relationship-preview { padding: 12px 16px; border: 1px solid #c3cfb9; border-radius: 8px; background: #eef3e6; overflow-wrap: anywhere; }
+.relationship-preview p { margin: 8px 0 0; }
+.relationship-type { text-transform: none; }
+
+/* Shared review states and explicit navigation affordances. */
+.proposal-status { gap: 8px; font-weight: 700; text-transform: none; }
+.proposal-status-icon { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-size: 18px; line-height: 1; background: #e2e6e0; color: #4e5c52; }
+.status-approved .proposal-status-icon { background: #24653d; color: white; }
+.status-rejected .proposal-status-icon { background: #aa3232; color: white; }
+.status-pending .proposal-status-icon { background: #f2ce54; color: #584000; }
+.status-draft .proposal-status-icon { background: #e2e6e0; color: #4e5c52; }
+.proposal-list-item + .proposal-list-item { margin-top: 12px; }
+.proposal-list-link { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding: 18px; border: 1px solid #c9d2c2; border-radius: 12px; background: #fafbf5; color: #243e30; text-decoration: none; transition: background .15s, border-color .15s; }
+.proposal-list-link:hover { background: #edf3e6; border-color: #63876b; }
+.proposal-list-title { display: grid; gap: 6px; flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
+.proposal-list-title small { color: #586858; }
+.proposal-open { padding: 8px 12px; border: 1px solid #b2c3af; border-radius: 8px; font-size: 13px; font-weight: 700; }
+.entity-history-entry { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; padding: 20px; margin: 24px 0; background: #e9efdf; border: 1px solid #a9bd9b; border-left: 5px solid #365c40; border-radius: 12px; }
+.entity-history-entry > div { display: grid; gap: 6px; flex: 1 1 240px; }
+.entity-history-entry > div > span { font-size: 14px; color: #52624e; }
+.ui-action-link { display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 44px; padding: 10px 16px; border: 1px solid #8da28a; border-radius: 9px; background: #fafbf5; color: #294b35; font-weight: 700; text-decoration: none; }
+.ui-action-link:hover { background: #dce9d4; }
+.ui-action-link.history-entry-button { background: #2d573b; color: white; border-color: #2d573b; }
+.ui-action-link.history-entry-button:hover { background: #203e2a; }
+.workflow-actions button.review-accept { background: #24653d; border: 1px solid #24653d; color: white; }
+.workflow-actions button.review-reject { background: #fff0ed; border: 1px solid #b85850; color: #922c28; }
+.workflow-actions button.review-reject:hover:not(:disabled) { background: #f6dcd7; }
+.workflow-actions button.review-accept:hover:not(:disabled) { background: #19492b; }
+.workflow-actions button > span { margin-right: 8px; }
+.ui-action-link:focus-visible, .proposal-list-link:focus-visible, .workspace-draft-row a:focus-visible { outline: 3px solid #ad793a; outline-offset: 3px; }
+.workspace-draft-row > a { display: inline-block; padding: 10px 14px; border: 1px solid #b6c4ae; border-radius: 8px; color: #2f5539; background: #fafbf5; text-decoration: none; }
+.workspace-draft-row > a:hover { background: #e5eddf; }
+.workflow-page .workflow-eyebrow {
+  margin: 0 0 8px;
+  color: #5b685e;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.workflow-page .workflow-heading h1 {
+  margin: 0;
+  max-width: none;
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.workflow-subtitle { margin: 12px 0 20px; color: #56645c; font-size: 16px; }
+.workflow-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.workflow-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: 1px solid #d6d9cd;
+  border-radius: 999px;
+  background: #f7f6ef;
+  color: #435449;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.workflow-badge.status-pending { background: #f5e9c9; border-color: #dfcb96; color: #755319; }
+.workflow-badge.status-approved { background: #e3eee4; border-color: #b5ceb9; color: #285338; }
+.workflow-badge.status-rejected { background: #f6e2dc; border-color: #e2bcb1; color: #88412d; }
+.workflow-notice {
+  margin: 20px 0;
+  padding: 18px 22px;
+  border: 1px solid #d8dacd;
+  border-left: 3px solid #839782;
+  border-radius: 10px;
+  background: #f5f4eb;
+  color: #495b4f;
+  font-size: 14px;
+}
+.workflow-notice p { margin: 6px 0 0; }
+.workflow-notice.success { background: #e5efe5; border-color: #bed2bf; color: #285338; }
+.workflow-comparison {
+  margin: 0 0 26px;
+  border: 1px solid #d3d8cc;
+  border-radius: 12px;
+  background: #f7f7ef;
+  overflow: hidden;
+}
+.workflow-comparison summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  cursor: pointer;
+  color: #294d3c;
+  font-weight: 600;
+  list-style: none;
+}
+.workflow-comparison summary::-webkit-details-marker { display: none; }
+.workflow-comparison summary::before { content: '+'; font-size: 22px; width: 18px; }
+.workflow-comparison[open] summary::before { content: '−'; }
+.workflow-comparison summary .workflow-badge { margin-left: auto; }
+.workflow-comparison-body { padding: 0 22px 22px; border-top: 1px solid #dce0d5; }
+.workflow-comparison-body pre { font: inherit; overflow-wrap: anywhere; }
+.proposal-content-form,
+.proposal-review {
+  padding: 28px;
+  border: 1px solid #d7d9cc;
+  border-radius: 14px;
+  background: rgba(255,255,255,.4);
+}
+.proposal-content-form { display: grid; gap: 10px; margin-bottom: 20px; }
+.proposal-content-form h2,
+.proposal-review h2 { margin: 0 0 12px; font-size: 24px; }
+.proposal-content-form > label { margin-top: 10px; font-size: 14px; font-weight: 600; }
+.proposal-content-form > :is(input, select, textarea),
+.proposal-review textarea,
+.relationship-editor :is(input, select, textarea) {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  background: #fffef9;
+  border: 1px solid #cdd3c6;
+  border-radius: 8px;
+  padding: 12px 14px;
+  line-height: 1.5;
+}
+.proposal-content-form textarea,
+.proposal-review textarea,
+.relationship-editor textarea { resize: vertical; }
+.proposal-content-form :is(input, select, textarea):disabled {
+  background: #f4f3ec;
+  color: #46534a;
+  opacity: 1;
+  -webkit-text-fill-color: #46534a;
+}
+.proposal-review { margin-top: 28px; }
+.proposal-review > p { color: #56645c; margin: 0 0 18px; }
+.proposal-review > label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.workflow-actions { justify-content: flex-start; margin-top: 20px; }
+.proposal-content-form > button { justify-self: start; margin-top: 8px; }
+.relationship-editor { min-width: 0; padding: 22px; }
+.relationship-editor h3 { margin: 0 0 8px; font-size: 19px; }
+.relationship-editor > p { color: #5b685e; font-size: 14px; line-height: 1.6; }
+.relationship-editor > label { display: block; margin: 18px 0 8px; font-size: 14px; font-weight: 600; }
+.relationship-fields {
+  display: grid;
+  min-width: 0;
+  gap: 9px;
+  margin: 22px 0;
+  padding: 18px;
+  border: 1px solid #d1d8cb;
+  border-radius: 10px;
+  background: rgba(255,255,255,.4);
+}
+.relationship-fields legend { padding: 0 8px; color: #375744; font-size: 13px; font-weight: 700; }
+.relationship-editor .relationship-fields label { display: block; margin: 8px 0 0; font-size: 13px; font-weight: 600; }
+.relationship-editor .relationship-fields button { justify-self: start; margin: 10px 0 0; }
+.history-toolbar { margin: 24px 0 16px; }
+.history-selector { display: grid; gap: 8px; max-width: 520px; margin: 28px 0 20px; }
+.history-selector label { font-size: 14px; font-weight: 600; }
+.history-selector select { width: 100%; min-width: 0; background: #fffef9; padding: 13px 15px; }
+.history-snapshot { margin-top: 0; padding: 28px; }
+.history-snapshot h2 { font-size: 27px; }
+.history-snapshot h3 { margin: 28px 0 8px; color: #526458; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; }
+.history-snapshot .snapshot-byline { margin-top: 12px; color: #647067; font-size: 13px; }
+.history-snapshot p, .history-snapshot li { overflow-wrap: anywhere; }
+.history-snapshot ul { padding-left: 20px; }
+.history-snapshot ul.snapshot-relationships { padding-left: 0; }
+.proposal-readonly { padding: 24px; border: 1px solid #d7d9cc; border-radius: 14px; background: #fafaf3; margin-bottom: 22px; overflow-wrap: anywhere; }
+.proposal-readonly h2 { margin: 0; font-size: 23px; }
+.proposal-entity-name { margin: 18px 0 0; font-size: 20px; color: #2c4935; }
+.proposal-readonly .snapshot-text-section h3 { margin: 0 0 10px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #5b6e57; }
+.relationship-readonly { margin-top: 24px; min-width: 0; overflow-wrap: anywhere; }
+.relationship-readonly h3 { font-size: 16px; color: #354e3a; }
+.relationship-reverse-note { font-size: 13px; color: #5a6b54; margin: 10px 0 0; }
+.relationship-fields { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.relationship-field { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.relationship-field-wide, .relationship-fields > .relationship-preview, .relationship-fields > button { grid-column: 1 / -1; }
+.workflow-comparison summary { display: grid; grid-template-columns: 18px minmax(0,1fr) auto; flex-wrap: unset; }
+@media(max-width:600px) {
+  .relationship-fields { grid-template-columns: minmax(0,1fr); }
+  .relationship-list { grid-template-columns: minmax(0,1fr); }
+  .proposal-readonly { padding: 16px; }
+  .workflow-comparison summary { grid-template-columns: 18px minmax(0,1fr); gap: 8px; padding: 14px; }
+  .workflow-comparison summary .workflow-badge { grid-column: 2; margin-left: 0; justify-self: start; }
+  .snapshot-relation-path { align-items: flex-start; gap: 7px; }
+}
+.history-snapshot li { margin-top: 12px; }
+.history-restore { justify-content: flex-start; padding-top: 22px; margin-top: 26px; border-top: 1px solid #d8dcd0; }
+.history-restore span { font-size: 13px; color: #657167; }
+.workflow-page :is(button,a,summary,select,input,textarea):focus-visible,
+.relationship-editor :is(button,input,select,textarea):focus-visible { outline: 3px solid #ad793a; outline-offset: 3px; }
+@media (max-width: 600px) {
+  .workflow-page { padding: 24px 16px; }
+  .workflow-nav { gap: 12px; margin-bottom: 24px; }
+  .proposal-content-form, .proposal-review, .history-snapshot { padding: 18px; }
+  .relationship-editor { padding: 14px; }
+  .relationship-fields { padding: 12px; }
+  .workflow-actions { align-items: stretch; flex-direction: column; }
+  .workflow-actions button { width: 100%; }
 }
 
 @media (max-width: 800px) {

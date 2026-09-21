@@ -8,12 +8,16 @@ Owner comes from `worlds.owner_id`. Other roles use `world_members`; only approv
 |---|---|---|---|---|
 | Read accessible content | Yes | Yes | Yes | Yes |
 | Save drafts and submit proposals | Yes | Yes | Yes | No |
-| Review others' proposals / directly update entities | Yes | Yes | No | No |
+| Review others' Author proposals | Yes | Yes | No | No |
+| Review Manager proposals | Yes | No | No | No |
+| Directly update entities and their outgoing relationships | Yes | No | No | No |
 | Directly create or delete entities | Yes | No | No | No |
+| View entity version history | Yes | Yes | Yes | No |
+| Roll back entity content | Yes | Yes | No | No |
 | Manage Readers and Authors | Yes | Yes | No | No |
 | Assign Managers / change visibility / transfer or delete world | Yes | No | No | No |
 
-Drafts are author-only. Submitted proposals are visible to their author and world managers. Self-review is forbidden. Managers cannot change themselves, other Managers, or the Owner.
+Drafts are author-only. Submitted proposals are visible to their author and world managers. Self-review is forbidden. Managers can review only current approved Authors' proposals, and cannot review proposals marked as requiring Owner review. The server records that requirement when a Manager creates, saves or submits a proposal; later demotion does not remove it. Managers cannot change themselves, other Managers, or the Owner. Manager rollback remains explicitly permitted.
 
 ## API
 
@@ -31,7 +35,8 @@ Drafts are author-only. Submitted proposals are visible to their author and worl
 | PATCH | /api/entities/:id | Direct update: `{ baseVersion, content }` |
 | POST | /api/worlds/:worldId/entities | Owner creates and publishes immediately: `{ content }` |
 | DELETE | /api/entities/:id | Owner soft-deletes immediately: `{ baseVersion }` |
-| GET | /api/entities/:id/versions | Version history for managers |
+| GET | /api/entities/:id/versions | Version history for Owner/Manager/Author |
+| POST | /api/entities/:id/rollback | Owner/Manager restores content: `{ baseVersion, targetVersion }` |
 
 Membership updates use `{ role, status }`; status is pending, approved, or rejected. World deletion requires `{ confirmName }`. Transfer makes the previous Owner a Manager.
 
@@ -68,6 +73,10 @@ FRONTEND_ORIGIN must match the browser origin. VITE_API_URL is a build-time sett
 
 Backend: `npm test` requires a MySQL account permitted to create and drop temporary test databases. Frontend: `npm run lint`, `npm exec tsc -- --noEmit`, `npm run build`.
 
-Owners can create entities in the world workspace and edit or delete them on the entity detail page without proposals. Direct writes retain version history and reject stale baseVersion values. The API exposes this owner capability as allowedActions.manageEntities; existing Manager direct-edit API permission remains unchanged.
+Owners can create entities in the world workspace and edit or delete them on the entity detail page without proposals. Direct writes retain version history and reject stale baseVersion values. Both allowedActions.manageEntities and allowedActions.edit are Owner-only; the backend also rejects Manager direct edits.
 
-Rich-text editing, realtime collaboration, relationship proposals, attachments, automatic merging, and rollback UI are out of scope. World transfer, world deletion, and member removal currently have API support without full UI.
+Entity history is available from the entity detail page. Only approved Authors, Managers and the Owner can read it, even in public worlds. Managers and the Owner can restore an earlier non-deleted snapshot, including restoring a soft-deleted entity through its history URL. A rollback publishes a new version and preserves existing history; it does not reset the version counter. Restored fields include name, type, description, body and recorded outgoing relationships. Tags and incoming relationships are unchanged. Legacy snapshots without relationship records preserve current relationships. Missing/deleted relationship targets abort the rollback. Existing proposals retain their base version and must resolve conflicts before publication.
+
+Relationships are edited with entity content and reviewed in the same proposal. Targets must be existing, non-deleted entities in the same world. No self-links or duplicate target/type pairs; custom relationship types are supported. Publication updates content, outgoing relationships and history in one transaction.
+
+Rich-text editing, realtime collaboration, attachments, automatic merging and visual diffs are out of scope. World transfer, world deletion, and member removal currently have API support without full UI.

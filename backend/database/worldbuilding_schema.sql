@@ -121,7 +121,9 @@ CREATE TABLE IF NOT EXISTS relationships (
     source_entity_id INT NOT NULL,
     target_entity_id INT NOT NULL,
 
+    -- User-defined display names, not a fixed domain-specific enum.
     relationship_type VARCHAR(100) NOT NULL,
+    reverse_name VARCHAR(100) NULL,
 
     description TEXT,
 
