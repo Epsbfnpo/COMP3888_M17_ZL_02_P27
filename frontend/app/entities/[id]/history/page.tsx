@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "../../../api";
-import type { OutgoingRelationship } from '../../../relationship-editor';
+//import type { OutgoingRelationship } from '../../../relationship-editor';
+
+type SnapshotRelationship = {
+  targetEntityId: number;
+  targetName?: string;
+  relationshipType: string;
+  description?: string | null;
+  reverseName?: string | null;
+};
 
 type Version = {
   id: number;
@@ -18,7 +26,7 @@ type Version = {
     body: { text: string } | null;
     deleted_at: string | null;
     rollback_of_version?: number;
-    outgoingRelationships?: OutgoingRelationship[];
+    outgoingRelationships?: SnapshotRelationship[];
   };
 };
 type History = {
@@ -37,6 +45,10 @@ function EntityHistory({ id }: { id: string }) {
   const [history, setHistory] = useState<History | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [compareFrom, setCompareFrom] = useState<number | null>(null);
+  const [compareTo, setCompareTo] = useState<number | null>(null);
+  const [comparedFrom, setComparedFrom] = useState<number | null>(null);
+  const [comparedTo, setComparedTo] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,7 +56,15 @@ function EntityHistory({ id }: { id: string }) {
   useEffect(() => {
     let active = true;
     api<History>(`/api/entities/${id}/versions`).then(data => {
-      if (active) { setHistory(data); setSelected(data.versions[0]?.version ?? null); }
+      if (active) {
+        setHistory(data);
+        setSelected(data.versions[0]?.version ?? null);
+
+        setCompareTo(data.versions[0]?.version ?? null);
+        setCompareFrom(data.versions[1]?.version ?? null);
+        setComparedFrom(null);
+        setComparedTo(null);
+      }
     }).catch(e => { if (active) setError(e instanceof Error ? e.message : "Could not load history"); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
@@ -54,7 +74,14 @@ function EntityHistory({ id }: { id: string }) {
     setBusy(true); setError(""); setMessage("");
     try {
       const data = await api<History>(`/api/entities/${id}/versions`);
-      setHistory(data); setSelected(data.versions[0]?.version ?? null);
+
+      setHistory(data);
+      setSelected(data.versions[0]?.version ?? null);
+
+      setCompareTo(data.versions[0]?.version ?? null);
+      setCompareFrom(data.versions[1]?.version ?? null);
+      setComparedFrom(null);
+      setComparedTo(null);
     } catch (e) {
       setHistory(null);
       setError(e instanceof Error ? e.message : "Could not load history");
@@ -74,13 +101,83 @@ function EntityHistory({ id }: { id: string }) {
       setHistory(null);
       setMessage(`Version ${selected} restored as version ${result.entity.version}.`);
       const data = await api<History>(`/api/entities/${id}/versions`);
-      setHistory(data); setSelected(result.entity.version);
+      setHistory(data);
+      setSelected(result.entity.version);
+
+      setCompareTo(data.versions[0]?.version ?? null);
+      setCompareFrom(data.versions[1]?.version ?? null);
+
+      setComparedFrom(null);
+      setComparedTo(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not restore version");
     } finally { setBusy(false); }
   }
 
   const version = history?.versions.find(v => v.version === selected);
+  const fromVersion = history?.versions.find(v => v.version === comparedFrom);
+  const toVersion = history?.versions.find(v => v.version === comparedTo);
+  const fromRelationships = fromVersion?.snapshot.outgoingRelationships;
+  const toRelationships = toVersion?.snapshot.outgoingRelationships;
+  const canCompareRelationships =
+    fromRelationships !== undefined &&
+    toRelationships !== undefined;
+  const relationshipKey = (relationship: SnapshotRelationship) =>
+  `${relationship.relationshipType}:${relationship.targetEntityId}`;
+  const addedRelationships =
+  canCompareRelationships
+    ? toRelationships.filter(
+        toRelationship =>
+          !fromRelationships.some(
+            fromRelationship =>
+              relationshipKey(fromRelationship) === relationshipKey(toRelationship)
+          )
+      )
+    : [];
+
+  const removedRelationships =
+    canCompareRelationships
+      ? fromRelationships.filter(
+          fromRelationship =>
+            !toRelationships.some(
+              toRelationship =>
+                relationshipKey(fromRelationship) === relationshipKey(toRelationship)
+            )
+        )
+      : [];
+
+const modifiedRelationships =
+  canCompareRelationships
+    ? toRelationships.filter(toRelationship => {
+        const fromRelationship = fromRelationships.find(
+          fromRelationship =>
+            relationshipKey(fromRelationship) === relationshipKey(toRelationship)
+        );
+
+        return (
+          fromRelationship !== undefined &&
+          (fromRelationship.description ?? "") !==
+            (toRelationship.description ?? "")
+        );
+      })
+    : [];
+
+const unchangedRelationships =
+  canCompareRelationships
+    ? toRelationships.filter(toRelationship => {
+        const fromRelationship = fromRelationships.find(
+          fromRelationship =>
+            relationshipKey(fromRelationship) === relationshipKey(toRelationship)
+        );
+
+        return (
+          fromRelationship !== undefined &&
+          (fromRelationship.description ?? "") ===
+            (toRelationship.description ?? "")
+        );
+      })
+    : [];
+
   return <main className="search-page"><section className="search-content workflow-page">
     <nav className="workflow-nav" aria-label="History navigation"><Link href={`/entities/${id}`}>← Back to entity</Link>
       {history&&<Link href={`/worlds/${history.entity.worldId}`}>Back to world ↗</Link>}</nav>
@@ -100,7 +197,237 @@ function EntityHistory({ id }: { id: string }) {
       <div className="workflow-notice"><strong>Restore without losing history</strong>
         <p>A restore creates a new version with earlier content and recorded outgoing relationships. Tags and incoming relationships stay unchanged.</p></div>
       {history.versions.length === 0 ? <p>No recorded versions yet.</p> : <>
-        <div className="history-selector"><label htmlFor="history-version">Select a version</label>
+        <div className="management-card version-compare">
+          <h2>Compare versions</h2>
+
+          <p>
+            Select two recorded versions to review what changed between them.
+          </p>
+
+          <div className="version-compare-controls">
+            <div className="version-compare-field">
+              <label htmlFor="compare-from">From version</label>
+
+              <select
+                id="compare-from"
+                value={compareFrom ?? ""}
+                disabled={busy}
+                onChange={e => setCompareFrom(Number(e.target.value))}
+              >
+                {history.versions.map(v => (
+                  <option key={v.id} value={v.version}>
+                    v{v.version} - {v.actor_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="version-compare-field">
+              <label htmlFor="compare-to">To version</label>
+
+              <select
+                id="compare-to"
+                value={compareTo ?? ""}
+                disabled={busy}
+                onChange={e => setCompareTo(Number(e.target.value))}
+              >
+                {history.versions.map(v => (
+                  <option key={v.id} value={v.version}>
+                    v{v.version} - {v.actor_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              className="version-compare-button"
+              type="button"
+              disabled={
+                busy ||
+                compareFrom === null ||
+                compareTo === null ||
+                compareFrom === compareTo
+              }
+              onClick={() => {
+                setComparedFrom(compareFrom);
+                setComparedTo(compareTo);
+              }}
+            >
+              Compare versions
+            </button>
+          </div>
+
+          {compareFrom === compareTo && compareFrom !== null && (
+            <p>Select two different versions to compare.</p>
+          )}
+          {fromVersion && toVersion && (
+            <div className="version-diff">
+              <h3 className="version-diff-title">
+                Changes from v{fromVersion.version} → v{toVersion.version}
+              </h3>
+
+            <div className="version-diff-section">
+              <h4>Name</h4>
+
+              {fromVersion.snapshot.name === toVersion.snapshot.name ? (
+                <p>No changes.</p>
+              ) : (
+              <div className="text-diff">
+                <div className="text-diff-before">
+                  <strong>Before</strong>
+                  <p>{fromVersion.snapshot.name}</p>
+                </div>
+
+                <div className="text-diff-after">
+                  <strong>After</strong>
+                  <p>{toVersion.snapshot.name}</p>
+                </div>
+              </div>
+              )}
+            </div>
+
+            <div className="version-diff-section">
+              <h4>Description</h4>
+
+              {fromVersion.snapshot.description === toVersion.snapshot.description ? (
+                <p>No changes.</p>
+              ) : (
+              <div className="text-diff">
+                <div className="text-diff-before">
+                  <strong>Before</strong>
+                  <p>{fromVersion.snapshot.description || "No description."}</p>
+                </div>
+
+                <div className="text-diff-after">
+                  <strong>After</strong>
+                  <p>{toVersion.snapshot.description || "No description."}</p>
+                </div>
+              </div>
+              )}
+            </div>
+
+            <div className="version-diff-section">
+              <h4>Content</h4>
+
+              {fromVersion.snapshot.body?.text === toVersion.snapshot.body?.text ? (
+                <p>No changes.</p>
+              ) : (
+              <div className="text-diff">
+                <div className="text-diff-before">
+                  <strong>Before</strong>
+                  <p>{fromVersion.snapshot.body?.text || "No content."}</p>
+                </div>
+
+                <div className="text-diff-after">
+                  <strong>After</strong>
+                  <p>{toVersion.snapshot.body?.text || "No content."}</p>
+                </div>
+              </div>
+              )}
+            </div>
+            <div className="version-diff-section">
+              <h4>Relationships</h4>
+
+              {!canCompareRelationships ? (
+                <p>
+                  Relationship comparison is unavailable because one of these versions
+                  did not record relationship history.
+                </p>
+              ) : (
+                <>
+                  {unchangedRelationships.length > 0 && (
+                    <div className="relationship-diff relationship-diff-unchanged">
+                      <h5>Unchanged</h5>
+                      <ul>
+                        {unchangedRelationships.map(relationship => (
+                          <li key={relationshipKey(relationship)}>
+                            {relationship.relationshipType} →{" "}
+                            {relationship.targetName ||
+                              `Entity #${relationship.targetEntityId}`}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {modifiedRelationships.length > 0 && (
+                    <div className="relationship-diff relationship-diff-modified">
+                      <h5>Modified</h5>
+
+                      <ul>
+                        {modifiedRelationships.map(relationship => {
+                          const beforeRelationship = fromRelationships?.find(
+                            fromRelationship =>
+                              relationshipKey(fromRelationship) === relationshipKey(relationship)
+                          );
+
+                          return (
+                            <li key={relationshipKey(relationship)}>
+                              <strong>
+                                {relationship.relationshipType} →{" "}
+                                {relationship.targetName ||
+                                  `Entity #${relationship.targetEntityId}`}
+                              </strong>
+
+                              <p>
+                                <strong>Before:</strong>{" "}
+                                {beforeRelationship?.description || "No description."}
+                              </p>
+
+                              <p>
+                                <strong>After:</strong>{" "}
+                                {relationship.description || "No description."}
+                              </p>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                  {removedRelationships.length > 0 && (
+                    <div className="relationship-diff relationship-diff-removed">
+                      <h5>Removed</h5>
+
+                      <ul>
+                        {removedRelationships.map(relationship => (
+                          <li key={relationshipKey(relationship)}>
+                            − {relationship.relationshipType} →{" "}
+                            {relationship.targetName ||
+                              `Entity #${relationship.targetEntityId}`}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {addedRelationships.length > 0 && (
+                    <div className="relationship-diff relationship-diff-added">
+                      <h5>Added</h5>
+
+                      <ul>
+                        {addedRelationships.map(relationship => (
+                          <li key={relationshipKey(relationship)}>
+                            + {relationship.relationshipType} →{" "}
+                            {relationship.targetName ||
+                              `Entity #${relationship.targetEntityId}`}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {addedRelationships.length === 0 &&
+                    removedRelationships.length === 0 &&
+                    modifiedRelationships.length === 0 && (
+                      <p>No relationship changes.</p>
+                    )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        </div>        
+        <div className="history-selector">
+          <label htmlFor="history-version">Select a version</label>
           <select id="history-version" value={selected ?? ""} disabled={busy} onChange={e => setSelected(Number(e.target.value))}>
             {history.versions.map(v => <option key={v.id} value={v.version}>
               v{v.version} - {v.actor_name}{v.snapshot.deleted_at ? " (deleted)" : ""}{v.snapshot.rollback_of_version ? ` (restored from v${v.snapshot.rollback_of_version})` : ""}
@@ -116,7 +443,7 @@ function EntityHistory({ id }: { id: string }) {
           {version.snapshot.outgoingRelationships === undefined ? <p>This legacy version did not record relationships. Restoring it will keep current relationships.</p> :
             version.snapshot.outgoingRelationships.length === 0 ? <p>No outgoing relationships.</p> :
               <ul className="snapshot-relationships">{version.snapshot.outgoingRelationships.map((r, index) => <li key={index}>
-                <div className="snapshot-relation-path"><strong>{version.snapshot.name}</strong><span className="snapshot-relation-label">→ {r.type} →</span><strong>{r.targetName || `Entity #${r.targetEntityId}`}</strong></div>
+                <div className="snapshot-relation-path"><strong>{version.snapshot.name}</strong><span className="snapshot-relation-label">→ {r.relationshipType} →</span><strong>{r.targetName || `Entity #${r.targetEntityId}`}</strong></div>
                 {r.reverseName && <div className="snapshot-relation-path"><strong>{r.targetName || `Entity #${r.targetEntityId}`}</strong><span className="snapshot-relation-label">→ {r.reverseName} →</span><strong>{version.snapshot.name}</strong></div>}
                 {r.description && <p className="snapshot-relation-note">{r.description}</p>}
               </li>)}</ul>}
