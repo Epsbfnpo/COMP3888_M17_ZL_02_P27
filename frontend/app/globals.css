@@ -1566,7 +1566,7 @@ a.entity-back-link:focus-visible, .entity-actions-panel :is(button,a):focus-visi
 }
 .workflow-comparison summary::-webkit-details-marker { display: none; }
 .workflow-comparison summary::before { content: '+'; font-size: 22px; width: 18px; }
-.workflow-comparison[open] summary::before { content: '−'; }
+.workflow-comparison[open] summary::before { content: '\2212'; }
 .workflow-comparison summary .workflow-badge { margin-left: auto; }
 .workflow-comparison-body { padding: 0 22px 22px; border-top: 1px solid #dce0d5; }
 .workflow-comparison-body pre { font: inherit; overflow-wrap: anywhere; }

@@ -56,6 +56,23 @@ On HTTP 409:
 - Revision conflict: reload the proposal and merge local edits.
 - Base-version conflict: reload edit-context, compare published content, and save resolved content with its baseVersion. Withdraw pending proposals first.
 
+### Frontend conflict recovery
+
+The proposal editor preserves local input when a write returns HTTP 409 and fetches the latest proposal separately. Saving and submission remain blocked until the user compares the latest draft and explicitly selects its revision while keeping their own input. That confirmation does not save, submit, merge content, or automatically update the entity baseVersion. Published-content comparison and base-version confirmation remain separate steps. Another concurrent change can still return 409 and reopen recovery.
+
+Unsaved proposal content is backed up in `sessionStorage`, scoped by signed-in user and proposal ID. Each tab keeps its own backup; refreshing the same tab restores the local input alongside the latest server draft for comparison. Successful saves clear the backup when the editor matches the saved content. Browser reload/close prompts warn about unsaved input. If browser storage fails, the editor displays a warning; users should copy their input before refreshing. Closing the tab ends this backup's lifetime.
+
+If the latest proposal is pending, its author may withdraw it from recovery without replacing local input. Approved proposals cannot be edited. Failed reloads leave local input intact and expose a retry button.
+
+Manual regression checks (two tabs signed in as the same Author):
+
+1. Open the same draft in A and B. Change name, description, body and relationships differently in each. Save A, then save B. B must show the latest A draft beside B's unchanged input and block save/submit until comparison is confirmed.
+2. Refresh B before confirming. B's input must recover, with A's latest draft available for comparison. Confirm, adjust the editor, and save. Reload A to verify the resolved content.
+3. After B confirms, save another change in A before B saves. B must enter recovery again; no stale overwrite is allowed.
+4. Publish a direct entity edit while an edit proposal is open. Save the proposal: recovery must fetch the new published content, preserve local input, and require explicit base-version selection before a successful save.
+5. Submit A while B has unsaved input. B's failed save must show pending status. Withdraw from recovery, confirm the returned draft revision, and save B's adjusted input.
+6. Make the API unavailable while reloading latest content. Local input must remain visible; restoring the API and retrying must recover the comparison. Repeat with browser storage disabled and verify the backup warning.
+
 Drafts are private to their author. Managers can view submitted proposals. Removed members lose proposal access.
 Only the author with current world membership can delete a draft, using its latest revision. Pending, approved and rejected proposals cannot be deleted. Withdraw a pending proposal before deleting it. The workspace separates submitted proposals from your private drafts.
 
