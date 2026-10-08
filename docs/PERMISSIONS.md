@@ -79,4 +79,4 @@ Entity history is available from the entity detail page. Only approved Authors, 
 
 Relationships are edited with entity content and reviewed in the same proposal. Targets must be existing, non-deleted entities in the same world. No self-links or duplicate target/type pairs; custom relationship types are supported. Publication updates content, outgoing relationships and history in one transaction.
 
-Rich-text editing, realtime collaboration, attachments, automatic merging and visual diffs are out of scope. World transfer, world deletion, and member removal currently have API support without full UI.
+Version history supports before/after comparisons of recorded content and outgoing relationships. Rich-text editing, realtime collaboration, attachments, automatic merging and inline word/line diffs are not implemented. World transfer, world deletion, and member removal currently have API support without full UI.

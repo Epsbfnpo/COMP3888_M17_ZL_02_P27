@@ -56,6 +56,16 @@ On HTTP 409:
 - Revision conflict: reload the proposal and merge local edits.
 - Base-version conflict: reload edit-context, compare published content, and save resolved content with its baseVersion. Withdraw pending proposals first.
 
+### Frontend recovery and status refresh
+
+Both Save and Save-and-submit preserve local input on HTTP 409. The editor fetches the latest draft and published content separately, then blocks saving until the author compares the changes and explicitly selects the latest draft revision. Selecting a revision keeps local input and does not save, merge or update the entity base version. A published-content conflict also requires explicit base-version selection. Further concurrent changes reopen recovery.
+
+Unsaved content is backed up in `sessionStorage`, scoped by signed-in user and proposal ID. Refreshing the same tab restores that input for comparison with the latest server draft. Successful saves clear the backup when input matches the saved content. A storage failure displays a warning, and unsaved input triggers a browser unload warning. This is a same-tab backup, not durable server autosave.
+
+Successful workflow actions refresh the proposal, permissions and published comparison. Review conflicts load the latest status; HTTP 403/404 removes stale editor/review controls and shows an unavailable notice with a workspace link where possible. Deleted published entities do not prevent viewing their existing proposals. The explicit reload button preserves unsaved input and opens comparison when needed. Other users' changes do not push updates into idle pages automatically.
+
+When a conflict reveals a pending proposal, its author can withdraw it from recovery without replacing local input. Approved proposals cannot be saved. Failed refreshes preserve input and allow retrying.
+
 Drafts are private to their author. Managers can view submitted proposals. Removed members lose proposal access.
 Only the author with current world membership can delete a draft, using its latest revision. Pending, approved and rejected proposals cannot be deleted. Withdraw a pending proposal before deleting it. The workspace separates submitted proposals from your private drafts.
 
@@ -67,6 +77,7 @@ Only the author with current world membership can delete a draft, using its late
 - History is immutable. The new snapshot includes `rollback_of_version`; `actor_id` identifies who restored it. No database migration is needed.
 - Stale `baseVersion` returns 409 without writing. Reload history and confirm the target again. Pending proposals are not rebased automatically and still face version checks when reviewed.
 - UI flags: `allowedActions.viewHistory` and `allowedActions.rollback`. Public visibility alone grants neither capability.
+- The history UI compares two recorded versions' name, entity type, description and body as before/after values. Outgoing relationships use the snapshot's `type` and target ID to identify links; description and `reverseName` changes are classified as modified. Forward-name changes appear as removal/addition. Legacy snapshots without relationship records display an unavailable comparison notice. Comparison never grants rollback rights.
 
 ## Relationships
 
