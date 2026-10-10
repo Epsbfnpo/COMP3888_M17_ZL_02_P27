@@ -191,8 +191,9 @@ const unchangedRelationships =
       <div className="workflow-notice"><strong>Restore without losing history</strong>
         <p>A restore creates a new version with earlier content and recorded outgoing relationships. Tags and incoming relationships stay unchanged.</p></div>
       {history.versions.length === 0 ? <p>No recorded versions yet.</p> : <>
-        <div className="management-card version-compare">
-          <h2>Compare versions</h2>
+        <details className="management-card version-compare">
+          <summary className="version-compare-summary"><span>Compare versions</span><span className="workflow-badge">Content &amp; relationships</span></summary>
+          <div className="version-compare-body">
 
           <p>
             Select two recorded versions to review what changed between them.
@@ -433,6 +434,7 @@ const unchangedRelationships =
           </div>
         )}
         </div>
+        </details>
         <div className="history-selector">
           <label htmlFor="history-version">Select a version</label>
           <select id="history-version" value={selected ?? ""} disabled={busy} onChange={e => setSelected(Number(e.target.value))}>

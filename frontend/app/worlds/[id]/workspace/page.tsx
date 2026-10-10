@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { api, apiFetch, API_URL } from "../../../api";
+import { api, apiFetch, API_URL, ApiError } from "../../../api";
 import EntityForm from "../../../entity-form";
 import ProposalStatus from "../../../proposal-status";
+import AccessNotice from "../../../access-notice";
 
 type World = {
   id: number;
@@ -64,6 +65,13 @@ export default function WorldWorkspace() {
   const [members, setMembers] = useState<Member[]>([]);
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [accessFailure, setAccessFailure] = useState<number | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [proposalError, setProposalError] = useState("");
+  const [memberError, setMemberError] = useState("");
+  const [entityError, setEntityError] = useState("");
   const [busy, setBusy] = useState(false);
   const [creatingEntity, setCreatingEntity] = useState(false);
 
@@ -84,6 +92,14 @@ export default function WorldWorkspace() {
   const [activeCandidate, setActiveCandidate] = useState(-1);
   const emailInput = useRef<HTMLInputElement>(null);
   const showCandidates = searchOpen && !selectedUser && candidates.length > 0;
+  const canUseTools = world && (world.allowedActions.propose || world.allowedActions.review ||
+    world.allowedActions.manageEntities || world.allowedActions.manageMembers || world.allowedActions.manageWorld);
+  const signInHref = `/?next=${encodeURIComponent(`/worlds/${id}/workspace`)}`;
+  const retry = () => setReloadKey(current => current + 1);
+  function hideRestrictedTools(status: number) {
+    setWorld(null);setEntities([]);setProposals([]);setMembers([]);
+    setAccessFailure(status);setCreatingEntity(false);setSelectedUser(null);setCandidates([]);
+  }
 
   function selectCandidate(candidate: Candidate) {
     setSelectedUser({ ...candidate, worldId: String(id) });
@@ -107,10 +123,13 @@ export default function WorldWorkspace() {
       try {
         const response = await apiFetch(`${API_URL}/api/worlds/${id}/member-candidates?q=${encodeURIComponent(emailQuery.trim())}`, { signal: controller.signal });
         const data = await response.json() as { users?: Candidate[]; error?: string };
-        if (!response.ok) throw new Error(data.error || 'Could not search users');
+        if (!response.ok) throw new ApiError(data.error || 'Could not search users', response.status);
         if (!controller.signal.aborted) { setCandidates(data.users || []); setSearched(true); }
       } catch (e) {
-        if (!controller.signal.aborted) setSearchError(e instanceof Error ? e.message : 'Could not search users');
+        if (!controller.signal.aborted) {
+          if (e instanceof ApiError && [401,403,404].includes(e.status)) hideRestrictedTools(e.status);
+          else setSearchError(e instanceof Error ? e.message : 'Could not search users');
+        }
       } finally {
         if (!controller.signal.aborted) setSearching(false);
       }
@@ -119,57 +138,80 @@ export default function WorldWorkspace() {
   }, [emailQuery, selectedUser, id, world]);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function load() {
+      setLoading(true);
       setError("");
+      setAccessFailure(null);setSignedIn(null);setWorld(null);
+      setEntities([]);setProposals([]);setMembers([]);
+      setProposalError("");setMemberError("");setEntityError("");
+      setCreatingEntity(false);setSelectedUser(null);setCandidates([]);setEmailQuery("");
+      setMemberMessage("");setDraftMessage("");setSearchError("");setSearched(false);setSearching(false);
 
       try {
-        const { world: w } = await api<{ world: World }>(`/api/worlds/${id}`);
-        setWorld(w);
+        const sessionResponse = await apiFetch(`${API_URL}/auth/me`, { signal: controller.signal });
+        if (!sessionResponse.ok && sessionResponse.status !== 401) throw new Error("Could not check your session. Please retry.");
+        if (controller.signal.aborted) return;
+        setSignedIn(sessionResponse.ok);
+        const { world: w } = await api<{ world: World }>(`/api/worlds/${id}`, "GET", undefined, controller.signal);
 
-        const entityResult = await api<{ results: Entity[] }>(
-          `/api/entities/search?q=${encodeURIComponent(w.name)}`
-        );
-
-        const worldEntities = entityResult.results.filter(
-          entity => Number(entity.world.id) === Number(w.id)
-        );
-
-        setEntities(worldEntities);
+        if (w.allowedActions.manageEntities) {
+          try {
+            const entityResult = await api<{ results: Entity[] }>(
+              `/api/entities/search?q=${encodeURIComponent(w.name)}`, "GET", undefined, controller.signal
+            );
+            if (controller.signal.aborted) return;
+            setEntities(entityResult.results.filter(entity => Number(entity.world.id) === Number(w.id)));
+          } catch (e) {
+            if (controller.signal.aborted) return;
+            if (e instanceof ApiError && [401,403,404].includes(e.status)) throw e;
+            setEntityError("Could not load entities. Reload the workspace to try again.");
+          }
+        }
 
         if (w.role) {
           try {
             const result = await api<{ proposals: Proposal[] }>(
-              `/api/worlds/${id}/proposals`
+              `/api/worlds/${id}/proposals`, "GET", undefined, controller.signal
             );
+            if (controller.signal.aborted) return;
             setProposals(result.proposals);
           } catch (e) {
-            console.error("Could not load proposals:", e);
-            setProposals([]);
+            if (controller.signal.aborted) return;
+            if (e instanceof ApiError && [401,403,404].includes(e.status)) throw e;
+            setProposalError("Could not load proposals or drafts. Reload the workspace to try again.");
           }
         }
 
         if (w.allowedActions.manageMembers) {
           try {
             const result = await api<{ members: Member[] }>(
-              `/api/worlds/${id}/members`
+              `/api/worlds/${id}/members`, "GET", undefined, controller.signal
             );
+            if (controller.signal.aborted) return;
             setMembers(result.members);
           } catch (e) {
-            console.error("Could not load members:", e);
-            setMembers([]);
+            if (controller.signal.aborted) return;
+            if (e instanceof ApiError && [401,403,404].includes(e.status)) throw e;
+            setMemberError("Could not load members. Reload the workspace to try again.");
           }
         }
 
-        setError("");
+        if (!controller.signal.aborted) setWorld(w);
       } catch (e) {
+        if (controller.signal.aborted) return;
         setWorld(null);
-        setEntities([]);
+        setEntities([]);setProposals([]);setMembers([]);
+        if (e instanceof ApiError && [401,403,404].includes(e.status)) setAccessFailure(e.status);
         setError(e instanceof Error ? e.message : "Could not load world");
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
 
     void load();
-  }, [id]);
+    return () => controller.abort();
+  }, [id, reloadKey]);
 
   async function run(work: () => Promise<void>) {
     setBusy(true);
@@ -178,7 +220,9 @@ export default function WorldWorkspace() {
     try {
       await work();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Request failed");
+      if (e instanceof ApiError && [401,403,404].includes(e.status)) {
+        hideRestrictedTools(e.status);
+      } else setError(e instanceof Error ? e.message : "Request failed");
     } finally {
       setBusy(false);
     }
@@ -198,24 +242,51 @@ export default function WorldWorkspace() {
         </Link>
         )}
 
-        {error && <p role="alert" className="message error">{error}</p>}
+        {world && error && <p role="alert" className="message error">{error}</p>}
 
-        {!world ? (
-          <p>Loading world…</p>
+        {loading ? (
+          <p role="status">Checking workspace access…</p>
+        ) : !world ? (
+          <AccessNotice tone="warning" title={accessFailure ? "Workspace unavailable" : "Could not load workspace"}
+            actions={<>
+              {(signedIn === false || accessFailure === 401) && <Link className="workspace-button" href={signInHref}>Sign in</Link>}
+              <button type="button" className="secondary-button" onClick={retry}>Try again</button>
+              <Link className="secondary-button" href="/home">Browse worlds</Link>
+            </>}>
+            <p>{accessFailure
+              ? "This world may be private, no longer available, or outside your current permissions."
+              : error || "Please retry to check your access."}</p>
+            {(signedIn === false || accessFailure === 401) && <p>Sign in with an approved member account, then try again.</p>}
+          </AccessNotice>
         ) : (
 <>
             <section className="world-overview">
                 <p className="step-label">Workspace</p>
                 <h1>{world.name} Workspace</h1>
                 <p>
-                Manage content, proposals, members and world settings.
+                {canUseTools ? "Your collaboration tools, based on your role in this world." : "Workspace tools are available to approved contributors."}
                 </p>
+                <div className="workflow-badges"><span className="workflow-badge">{world.visibility === 'private' ? 'Private world' : 'Public world'}</span><span className="workflow-badge">{world.role || (signedIn ? 'Non-member' : 'Signed out')}</span></div>
             </section>
 
+            {!canUseTools && <AccessNotice title={!world.role ? (signedIn ? "Membership required" : "Sign in to collaborate") : "Read-only access"}
+              actions={<>
+                {!signedIn && <Link className="workspace-button" href={signInHref}>Sign in</Link>}
+                <Link className="secondary-button" href={`/worlds/${world.id}`}>View world</Link>
+                <button type="button" className="secondary-button" onClick={retry}>Check access again</button>
+              </>}>
+              <p>{!world.role
+                ? signedIn ? "You can read this public world, but you are not an approved member. Ask the owner or a manager to add your account."
+                  : "You are browsing as a visitor. Sign in with an approved member account to open collaboration tools."
+                : "Your Reader role allows you to view this world. Creating proposals, reviewing changes and managing members require a contributor role."}</p>
+              {world.role === 'reader' && <p>Ask the owner or a manager if you need Author access.</p>}
+            </AccessNotice>}
+
             {/* World management */}
+            {(canUseTools || proposals.length > 0 || proposalError) && <>
             <section className="world-management">
               <p className="step-label">Administration</p>
-              <h2>World management</h2>
+              <div className="workspace-section-heading"><h2>{world.allowedActions.manageWorld || world.allowedActions.manageMembers ? 'World management' : 'Your contributions'}</h2><button type="button" className="secondary-button" disabled={busy} onClick={retry}>Reload workspace</button></div>
 
               {world.allowedActions.manageWorld && (
                 <div className="status-panel">
@@ -240,9 +311,9 @@ export default function WorldWorkspace() {
               {world.allowedActions.manageEntities && (
                 <section className="management-card workspace-entities">
                   <div className="workspace-entities-heading"><div><p className="workflow-eyebrow">World content</p><h2>Entities</h2></div>
-                    <span className="workflow-badge">{entities.length} {entities.length===1?'entity':'entities'}</span></div>
+                    {!entityError && <span className="workflow-badge">{entities.length} {entities.length===1?'entity':'entities'}</span>}</div>
                   <p className="workspace-entities-intro">Explore and manage the people, places and ideas in this world.</p>
-                  {entities.length===0 ? <div className="workspace-entities-empty">No entities yet. Create the first piece of your world below.</div> :
+                  {entityError ? <p role="alert" className="message error">{entityError}</p> : entities.length===0 ? <div className="workspace-entities-empty">No entities yet. Create the first piece of your world below.</div> :
                     <ul className="workspace-entity-list">{entities.map(entity => <li key={entity.id}>
                       <Link className="workspace-entity-row" href={`/entities/${entity.id}?from=world`}>
                         <span className="workspace-entity-icon" aria-hidden="true">{entity.name.slice(0,1).toUpperCase()}</span>
@@ -257,9 +328,14 @@ export default function WorldWorkspace() {
                     initial={{ name: '', entityType: 'other', description: '', body: { format: 'markdown', text: '' }, outgoingRelationships: [] }}
                     onCancel={() => setCreatingEntity(false)}
                     onSave={async content => {
-                      const result = await api<{ entity: { id: number } }>(`/api/worlds/${id}/entities`, 'POST', { content });
-                      setCreatingEntity(false);
-                      router.push(`/entities/${result.entity.id}?from=world`);
+                      try {
+                        const result = await api<{ entity: { id: number } }>(`/api/worlds/${id}/entities`, 'POST', { content });
+                        setCreatingEntity(false);
+                        router.push(`/entities/${result.entity.id}?from=world`);
+                      } catch (e) {
+                        if (e instanceof ApiError && [401,403,404].includes(e.status)) hideRestrictedTools(e.status);
+                        throw e;
+                      }
                     }}
                   /> : <button onClick={() => setCreatingEntity(true)}>New entity</button>}
                 </section>
@@ -305,7 +381,7 @@ export default function WorldWorkspace() {
                       : "Your proposals"}
                   </h2>
 
-                  {submittedProposals.length === 0 ? (
+                  {proposalError ? <p role="alert" className="message error">{proposalError}</p> : submittedProposals.length === 0 ? (
                     <p>No proposals yet.</p>
                   ) : (
                     submittedProposals.map(p => (
@@ -320,9 +396,9 @@ export default function WorldWorkspace() {
                   )}
                 </section>
                 <section className="management-card">
-                  <div className="workspace-section-heading"><div><p className="workflow-eyebrow">Your private space</p><h2>Your drafts</h2></div><span className="workflow-badge">{drafts.length} drafts</span></div>
+                  <div className="workspace-section-heading"><div><p className="workflow-eyebrow">Your private space</p><h2>Your drafts</h2></div>{!proposalError && <span className="workflow-badge">{drafts.length} drafts</span>}</div>
                   <p className="workspace-section-description">Only you can see your unsubmitted drafts. Draft deletion is permanent.</p>
-                  {drafts.length === 0 ? <div className="workspace-empty-state"><span className="workspace-empty-icon" aria-hidden="true">✎</span><div><strong>No drafts yet</strong><p>Your saved proposals will appear here before you submit them for review.</p></div></div> : drafts.map(p => (
+                  {proposalError ? <p>Drafts are unavailable until proposals can be loaded.</p> : drafts.length === 0 ? <div className="workspace-empty-state"><span className="workspace-empty-icon" aria-hidden="true">✎</span><div><strong>No drafts yet</strong><p>Your saved proposals will appear here before you submit them for review.</p></div></div> : drafts.map(p => (
                     <div className="workspace-draft-row" key={p.id}>
                       <Link href={`/proposals/${p.id}`}>
                         {p.content.name || `Draft #${p.id}`} · {p.action}
@@ -347,7 +423,8 @@ export default function WorldWorkspace() {
               {/* Members */}
               {world.allowedActions.manageMembers && (
                 <section className="management-card">
-                  <div className="workspace-section-heading"><div><p className="workflow-eyebrow">World collaboration</p><h2>Members</h2></div><span className="workflow-badge">{members.length} members</span></div>
+                  <div className="workspace-section-heading"><div><p className="workflow-eyebrow">World collaboration</p><h2>Members</h2></div>{!memberError && <span className="workflow-badge">{members.length} members</span>}</div>
+                  {memberError && <p role="alert" className="message error">{memberError}</p>}
 
                   <p>
                     Search by email and select a registered user to add or update membership.
@@ -485,6 +562,7 @@ export default function WorldWorkspace() {
                 </section>
               )}
             </section>
+            </>}
           </>
         )}
       </section>

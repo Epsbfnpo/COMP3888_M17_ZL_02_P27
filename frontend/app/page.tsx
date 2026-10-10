@@ -54,7 +54,9 @@ export default function Home() {
           "worldbuilding-user",
           JSON.stringify(data.user)
         );
-        router.push("/home");
+        const next = new URLSearchParams(window.location.search).get("next");
+        // Only workspace routes are valid return destinations; never redirect to external URLs.
+        router.push(next && /^\/worlds\/[1-9]\d*\/workspace$/.test(next) ? next : "/home");
       }
     } catch {
       setResult({

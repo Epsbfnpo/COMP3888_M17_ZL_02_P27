@@ -233,7 +233,9 @@ export default function WorldPage() {
                 <p className="step-label">Collaboration</p>
                 <h2>World Workspace</h2>
                 <p>
-                  Manage this world, create proposals and collaborate with other members.
+                  {world.role === 'reader' ? 'You have read-only access. A contributor role is required to propose or review changes.'
+                    : world.role ? 'Open the collaboration tools available to your role.'
+                    : 'Public reading does not grant collaboration access. An approved membership is required.'}
                 </p>
               </div>
 
@@ -241,7 +243,7 @@ export default function WorldPage() {
                 href={`/worlds/${world.id}/workspace?from=world`}
                 className="workspace-button"
               >
-                Open World Workspace →
+                {world.role && world.role !== 'reader' ? 'Open World Workspace →' : 'Check workspace access →'}
               </Link>
             </section>
           </>
