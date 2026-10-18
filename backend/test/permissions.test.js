@@ -73,6 +73,15 @@ test('world access and proposal lifecycle', async () => {
     await request(author,'GET',`/api/worlds/${w}/members`,null,403);
     const content={name:'Hidden person',entityType:'character',description:'A private entity',body:{format:'markdown',text:'Private markdown'}};
     const disposable=(await request(author,'POST',`/api/worlds/${w}/proposals`,{action:'create',content},201)).data.proposal;
+    await request(null,'POST','/api/ai/context',{kind:'world',id:w},401);
+    await request(outsider,'POST','/api/ai/context',{kind:'world',id:w},404);
+    const readerContext=await request(reader,'POST','/api/ai/context',{kind:'world',id:w});
+    assert.equal(readerContext.data.context.world.id,w);
+    assert.equal(readerContext.response.headers.get('cache-control'),'no-store');
+    for(const u of [owner,manager,reader,outsider]) await request(u,'POST','/api/ai/context',{kind:'proposal',id:disposable.id},404);
+    assert.equal((await request(author,'POST','/api/ai/context',{kind:'proposal',id:disposable.id})).data.context.proposal.revision,1);
+    await request(null,'POST','/api/ai/chat',{message:'Help',context:{kind:'none'}},401);
+    await request(outsider,'POST','/api/ai/chat',{message:'Help',context:{kind:'world',id:w}},404);
     await request(null,'DELETE',`/api/proposals/${disposable.id}`,{revision:1},401);
     for(const user of [owner,manager,reader,outsider]) await request(user,'DELETE',`/api/proposals/${disposable.id}`,{revision:1},404);
     await request(author,'DELETE',`/api/proposals/${disposable.id}`,{revision:99},409);
@@ -92,6 +101,17 @@ test('world access and proposal lifecycle', async () => {
     await request(outsider,'POST',`/api/worlds/${w}/entities`,{content:directContent},404);
     await request(owner,'POST',`/api/worlds/${w}/entities`,{content:{...directContent,name:''}},400);
     const direct=(await request(owner,'POST',`/api/worlds/${w}/entities`,{content:directContent},201)).data.entity;
+    const entityAI=await request(reader,'POST','/api/ai/context',{kind:'entity',id:direct.id,includeBody:false,includeRelationships:false});
+    assert.equal(entityAI.data.context.entity.id,direct.id);
+    assert.equal(entityAI.data.context.entity.body,undefined);
+    assert.equal(entityAI.data.context.entity.relationships,undefined);
+    if(process.env.AI_LIVE_SMOKE==='1') {
+      const answer=await request(owner,'POST','/api/ai/chat',{task:'general',message:'In one short sentence, describe the supplied entity without inventing facts.',history:[],context:{kind:'entity',id:direct.id,includeBody:true,includeRelationships:true}});
+      assert.equal(answer.data.mode,'live');assert.equal(answer.data.model,'gemini-3.8-flash');
+      assert.ok(answer.data.reply.length>0);assert.equal(answer.data.context.entity.id,direct.id);
+      assert.equal(answer.data.request.systemInstruction,undefined);
+      console.log('Live Gemini HTTP smoke passed using isolated fixture content.');
+    }
     assert.equal((await request(reader,'GET',`/api/entities/${direct.id}`)).data.entity.creator.id,owner.id);
     assert.equal((await request(owner,'GET',`/api/worlds/${w}/proposals`)).data.proposals.length,0);
     let stale=(await request(author,'POST',`/api/worlds/${w}/proposals`,{action:'edit',entityId:direct.id,baseVersion:1,content:directContent},201)).data.proposal;

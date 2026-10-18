@@ -15,6 +15,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(security.session);
 app.use(require('./content-api'));
 app.use(require('./proposal-api'));
+app.use(require('./assistant-api'));
 app.get('/auth/me', (req, res) => {
   security.loginRequired(req);
   res.json({ user: req.user });

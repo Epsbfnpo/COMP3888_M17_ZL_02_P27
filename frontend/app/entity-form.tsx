@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import RelationshipEditor, { type OutgoingRelationship } from './relationship-editor';
+import DraftCheckButton from './draft-check-button';
 
 export type EntityContent = {
   name: string;
@@ -11,9 +12,10 @@ export type EntityContent = {
   outgoingRelationships?: OutgoingRelationship[];
 };
 
-export default function EntityForm({ initial, onSave, onCancel, worldId, entityId }: {
+export default function EntityForm({ initial, onSave, onCancel, worldId, entityId, baseVersion }: {
   worldId: number;
   entityId?: number;
+  baseVersion?: number;
   initial: EntityContent;
   onSave: (content: EntityContent) => Promise<void>;
   onCancel: () => void;
@@ -48,6 +50,7 @@ export default function EntityForm({ initial, onSave, onCancel, worldId, entityI
     <RelationshipEditor worldId={worldId} entityId={entityId} value={value.outgoingRelationships}
       disabled={busy} onChange={outgoingRelationships => setValue({ ...value, outgoingRelationships })} />
     {error && <p className="message error" role="alert">{error}</p>}
+    <DraftCheckButton disabled={busy} draft={{worldId,entityId,baseVersion,content:value}}/>
     <div className="edit-profile-actions">
       <button type="button" className="secondary-button" disabled={busy} onClick={onCancel}>Cancel</button>
       <button disabled={busy}>{busy ? 'Saving…' : 'Save and publish'}</button>

@@ -242,3 +242,4 @@ router.post('/api/entities/:id/rollback',async(req,res)=>{
   res.json({entity:result});
 });
 module.exports=router;
+module.exports.readProposal = proposal;

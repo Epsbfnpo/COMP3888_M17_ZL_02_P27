@@ -213,7 +213,7 @@ function EntityDetail() {
         {entity.allowedActions.manageEntities && (
           <div className="entity-edit-controls">
             {editing && editContent ? <EntityForm
-              worldId={entity.world.id} entityId={entity.id}
+              worldId={entity.world.id} entityId={entity.id} baseVersion={entity.version}
               initial={editContent}
               onSave={saveEntity}
               onCancel={() => setEditing(false)}

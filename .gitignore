@@ -1,5 +1,8 @@
 backend/node_modules/
 backend/.env
+.env
+.env.*
+!.env.example
 npm-debug.log*
 .DS_Store
 backups/
