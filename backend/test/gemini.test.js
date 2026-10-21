@@ -39,6 +39,13 @@ test('bounds replies so the next conversation turn remains valid', async () => {
   const answer=await createGemini({getKey:()=> 'fixture',fetchImpl:async()=>({ok:true,json:async()=>({candidates:[{finishReason:'MAX_TOKENS',content:{parts:[{text:'x'.repeat(5000)}]}}]})})})(request);
   assert.ok(answer.reply.length<=4000);assert.match(answer.reply,/Response shortened/);
 });
+
+test('edit mode preserves complete long replacements and rejects token-truncated output',async()=>{
+  const reply=JSON.stringify({suggestedText:'x'.repeat(4500)});
+  const generate=finishReason=>createGemini({getKey:()=> 'fixture',fetchImpl:async()=>({ok:true,json:async()=>({candidates:[{finishReason,content:{parts:[{text:reply}]}}]})})});
+  assert.equal((await generate('STOP')({...request,editMode:true})).reply,reply);
+  await assert.rejects(generate('MAX_TOKENS')({...request,editMode:true}),{status:502});
+});
 test('usage guard enforces concurrent and per-minute limits, resets, and bounds memory', () => {
   let time=0;const begin=createUsageGuard({now:()=>time,limit:2,maxUsers:1});
   const release=begin(1);assert.throws(()=>begin(1),{status:429});assert.throws(()=>begin(2),{status:429});

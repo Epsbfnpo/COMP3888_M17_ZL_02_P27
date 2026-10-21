@@ -7,6 +7,8 @@ import RelationshipEditor from '../../relationship-editor';
 import ProposalStatus from '../../proposal-status';
 import type { EntityContent } from '../../entity-form';
 import DraftCheckButton from '../../draft-check-button';
+import EditorAISuggestion from '../../editor-ai-suggestion';
+import {suggestionIsStale} from '../../edit-suggestion';
 
 type Content = EntityContent;
 type Proposal = {id:number;worldId:number;entityId:number|null;authorId:number;action:string;status:string;revision:number;baseVersion:number|null;content:Content;reviewComment:string|null;canReview?:boolean};
@@ -234,6 +236,7 @@ function ProposalDetail({id}: {id:string}) {
         <label htmlFor="body">Body (Markdown)</label><textarea id="body" rows={editable?10:5} maxLength={200000} disabled={!editable||busy} value={value.body?.text||''} onChange={e=>setValue({...value,body:{format:'markdown',text:e.target.value}})}/>
         <RelationshipEditor worldId={p.worldId} entityId={p.entityId??undefined} value={value.outgoingRelationships}
           disabled={!editable||busy} onChange={outgoingRelationships=>setValue({...value,outgoingRelationships})} />
+        <EditorAISuggestion disabled={busy||recoveryNeeded} draft={{worldId:p.worldId,entityId:p.entityId,proposalId:p.id,baseVersion:p.baseVersion,proposalRevision:p.revision,content:value}} onApply={suggestion=>setValue(current=>!current||suggestionIsStale(suggestion,{text:current.body.text,baseVersion:p.baseVersion,proposalRevision:p.revision})?current:{...current,body:{format:'markdown',text:suggestion.suggestedText}})}/>
         <DraftCheckButton disabled={busy} draft={{worldId:p.worldId,entityId:p.entityId,proposalId:p.id,baseVersion:p.baseVersion,proposalRevision:p.revision,content:value}}/>
         {editable&&<button disabled={busy||recoveryNeeded}>Save draft</button>}
       </form>}

@@ -21,7 +21,7 @@ function createGemini({ fetchImpl = fetch, getKey = getGeminiApiKey, timeoutMs =
             ...request.history.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.text }] })),
             { role: 'user', parts: [{ text: request.message }] },
           ],
-          generationConfig: { maxOutputTokens: 1200, thinkingConfig: { thinkingLevel: 'low' } },
+          generationConfig: { maxOutputTokens: request.editMode?4096:1200, thinkingConfig: { thinkingLevel: 'low' } },
         }),
       });
     } catch {
@@ -41,6 +41,10 @@ function createGemini({ fetchImpl = fetch, getKey = getGeminiApiKey, timeoutMs =
     const candidate = data.candidates?.[0];
     const text = (candidate?.content?.parts || []).filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('').trim();
     if (!text || !['STOP','MAX_TOKENS'].includes(candidate?.finishReason)) throw problem(502, 'No usable answer was returned. Rephrase your request and try again.');
+    if(request.editMode){
+      if(candidate.finishReason!=='STOP'||text.length>24000)throw problem(502,'The suggested edit was incomplete or too long. Request a smaller change; your draft is unchanged.');
+      return {model,reply:text};
+    }
     const shortened = text.length > 3900 || candidate.finishReason === 'MAX_TOKENS';
     return { model, reply: text.slice(0,3900) + (shortened ? '\n\n[Response shortened. Ask a focused follow-up for more detail.]' : '') };
   };

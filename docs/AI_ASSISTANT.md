@@ -143,6 +143,28 @@ in page memory and reset on navigation or reload. Long replies are bounded for
 subsequent history requests, with an explicit shortening notice. Basic bold/code
 formatting is rendered as React text, never injected HTML.
 
+## Embedded body suggestions
+
+Editable entity forms and owned editable proposals offer **Suggest a body edit
+with AI**. The user enters a request, previews a line diff, and chooses Apply to
+draft or Dismiss. Applying replaces only the unsaved Markdown body; existing
+save, proposal review and optimistic version checks remain authoritative.
+
+`POST /api/ai/edit-body` accepts a message, context selection and draft snapshot.
+It reuses contribution permissions, proposal ownership, rate limits and provider
+timeouts. The backend validates baseline versions and proposal revisions both
+before and after generation. Original text and versions come from the validated
+request snapshot, never from model output. The model returns JSON containing only
+the suggested replacement. Malformed, empty, oversized or token-truncated output
+is rejected without changing any content. Input bodies are limited to 6,000
+characters and replacement bodies to 12,000 characters for this first release.
+
+Changing editor content or version metadata invalidates the displayed suggestion.
+Generating does not lock the editor. Closing the editor cancels its local request;
+the provider may already have started processing. Changes saved remotely after
+generation are still caught by the normal save-time version checks. The first
+release offers whole-body acceptance only, not per-line acceptance or auto-save.
+
 ## Usage limits and verification
 
 Each signed-in user is limited to one active request and six attempts per minute.

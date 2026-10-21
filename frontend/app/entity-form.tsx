@@ -3,6 +3,8 @@
 import { useState } from "react";
 import RelationshipEditor, { type OutgoingRelationship } from './relationship-editor';
 import DraftCheckButton from './draft-check-button';
+import EditorAISuggestion from './editor-ai-suggestion';
+import {suggestionIsStale} from './edit-suggestion';
 
 export type EntityContent = {
   name: string;
@@ -47,6 +49,7 @@ export default function EntityForm({ initial, onSave, onCancel, worldId, entityI
     <label htmlFor="entity-body">Body (Markdown)</label>
     <textarea id="entity-body" rows={12} maxLength={200000} disabled={busy} value={value.body.text}
       onChange={e => setValue({ ...value, body: { format: 'markdown', text: e.target.value } })} />
+    <EditorAISuggestion disabled={busy} draft={{worldId,entityId,baseVersion,content:value}} onApply={suggestion=>setValue(current=>suggestionIsStale(suggestion,{text:current.body.text,baseVersion})?current:{...current,body:{format:'markdown',text:suggestion.suggestedText}})}/>
     <RelationshipEditor worldId={worldId} entityId={entityId} value={value.outgoingRelationships}
       disabled={busy} onChange={outgoingRelationships => setValue({ ...value, outgoingRelationships })} />
     {error && <p className="message error" role="alert">{error}</p>}

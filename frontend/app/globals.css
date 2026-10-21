@@ -1901,6 +1901,12 @@ a.entity-back-link:focus-visible, .entity-actions-panel :is(button,a):focus-visi
 .ai-panel { position: absolute; bottom: 72px; right: 0; display: flex; flex-direction: column; width: 420px; height: min(660px, calc(100dvh - 126px)); overflow: hidden; border: 1px solid #cbd4c5; border-radius: 20px; background: #faf8f0; box-shadow: 0 22px 70px #142b2529, 0 3px 10px #142b2512; }
 .ai-panel[hidden] { display: none; }
 .ai-context-options { font-size: 11px; }
+.editor-ai-suggestion { margin: 14px 0; }
+.editor-ai-suggestion > details { padding: 12px 14px; border: 1px solid #cbd6c4; border-radius: 10px; background: #f1f3e9; }
+.editor-ai-suggestion summary { cursor: pointer; font-weight: 600; color: #244b38; }
+.editor-ai-suggestion details > label { margin-top: 12px; }
+.editor-ai-suggestion details > p, .editor-ai-suggestion > p { font-size: 12px; color: #526351; }
+.editor-ai-suggestion details > button { margin-right: 8px; }
 .ai-context-body { max-height: 170px; overflow-y: auto; overscroll-behavior: contain; padding-top: 8px; }
 .ai-context-body[hidden] { display: none; }
 .ai-widget .ai-context-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; color: #244b38; text-align: left; cursor: pointer; }

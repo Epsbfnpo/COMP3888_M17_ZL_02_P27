@@ -21,6 +21,22 @@ async function fixture(generate){
   return {setAllowed:value=>{allowed=value;},post:(route,data,auth=true)=>fetch('http://127.0.0.1:'+server.address().port+route,{method:'POST',headers:{'Content-Type':'application/json',...(auth?{'X-Fixture-User':'1'}:{})},body:JSON.stringify(data)}),close:async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}};
 }
 const body={task:'general',message:'In one short sentence, when can ships enter this port?',history:[],context:{kind:'world',id:1}};
+
+test('body edit returns a preview with server-owned original text and never accepts malformed edits',async()=>{
+  let reply=JSON.stringify({suggestedText:'Revised body'}),calls=0,revoke=false;
+  const f=await fixture(async compiled=>{calls++;assert.equal(compiled.editMode,true);if(revoke)f.setAllowed(false);return {model:'fixture',reply};});
+  const payload={message:'Improve clarity',context:{kind:'world',id:1},draft:{worldId:1,content:{name:'Draft',entityType:'other',description:'',body:{format:'markdown',text:'Original body'}}}};
+  try{
+    assert.equal((await f.post('/api/ai/edit-body',payload,false)).status,401);assert.equal(calls,0);
+    assert.equal((await f.post('/api/ai/edit-body',{...payload,draft:undefined})).status,400);assert.equal(calls,0);
+    const response=await f.post('/api/ai/edit-body',payload);assert.equal(response.status,200);
+    const data=await response.json();assert.equal(data.suggestion.originalText,'Original body');assert.equal(data.suggestion.suggestedText,'Revised body');assert.ok(data.suggestion.id);assert.equal(data.suggestion.baseVersion,null);
+    reply='Here is your edit';assert.equal((await f.post('/api/ai/edit-body',payload)).status,502);
+    reply=JSON.stringify({suggestedText:''});assert.equal((await f.post('/api/ai/edit-body',payload)).status,502);
+    reply=JSON.stringify({suggestedText:'Changed'});revoke=true;
+    assert.equal((await f.post('/api/ai/edit-body',payload)).status,404);
+  }finally{await f.close();}
+});
 test('HTTP auth, context, live response and in-flight permission revocation',async()=>{
   let calls=0,revoke=false;
   const f=await fixture(async()=>{calls++;if(revoke)f.setAllowed(false);return {model:'gemini-3.8-flash',reply:'Fixture answer'};});
@@ -45,6 +61,18 @@ test('opt-in real Gemini HTTP smoke with synthetic context',{skip:process.env.AI
     assert.equal(r.status,200,answer.error);assert.equal(answer.mode,'live');assert.equal(answer.model,'gemini-3.8-flash');assert.ok(answer.reply.length>0);
     console.log('Real Gemini HTTP reply:',answer.reply);
   } finally {await f.close();}
+});
+
+test('opt-in real Gemini body edit produces a complete validated replacement',{skip:process.env.AI_LIVE_EDIT_SMOKE!=='1'},async()=>{
+  require('dotenv').config({path:path.join(__dirname,'../.env'),quiet:true});
+  const f=await fixture();
+  try{
+    const original='Ships arrive during daylight. The port closes to all vessels at night.';
+    const response=await f.post('/api/ai/edit-body',{message:'Improve the wording of this short paragraph. Preserve the absolute night-entry ban. Return the full revised body.',context:{kind:'world',id:1},draft:{worldId:1,content:{name:'Port notice',entityType:'other',description:'A synthetic test notice.',body:{format:'markdown',text:original}}}});
+    const data=await response.json();assert.equal(response.status,200,data.error);
+    assert.equal(data.suggestion.originalText,original);assert.ok(data.suggestion.suggestedText.trim());
+    assert.ok(data.suggestion.suggestedText.length<=12000);
+  }finally{await f.close();}
 });
 test('opt-in unsaved draft consistency check with a selected published reference',{skip:process.env.AI_LIVE_SMOKE!=='1'},async()=>{
   require('dotenv').config({path:path.join(__dirname,'../.env'),quiet:true});

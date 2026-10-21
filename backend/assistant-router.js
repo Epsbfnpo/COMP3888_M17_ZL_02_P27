@@ -1,5 +1,6 @@
 const { createGemini, createUsageGuard, model } = require('./gemini');
 const { getGeminiApiKey } = require('./ai-config');
+const {prepareEdit,parseEdit}=require('./assistant-edit');
 
 function createAssistantRouter({ assistant, generate = createGemini(), begin = createUsageGuard(), getKey = getGeminiApiKey }) {
   const router = require('express').Router();
@@ -18,7 +19,7 @@ function createAssistantRouter({ assistant, generate = createGemini(), begin = c
     res.set('Cache-Control','no-store');
     res.json(await assistant.preview(req.user,req.body));
   });
-  router.post('/api/ai/chat', async (req,res,next) => {
+  router.post(['/api/ai/chat','/api/ai/edit-body'], async (req,res,next) => {
     res.set('Cache-Control','no-store');
     const controller=new AbortController();
     let release;
@@ -27,10 +28,13 @@ function createAssistantRouter({ assistant, generate = createGemini(), begin = c
     try {
       if(!req.user)throw Object.assign(new Error('Sign in required'),{status:401});
       release=begin(req.user.id);
-      const compiled=await assistant.prepare(req.user,req.body);
+      const editing=req.path==='/api/ai/edit-body';
+      const compiled=editing?await prepareEdit(assistant,req.user,req.body):await assistant.prepare(req.user,req.body);
       const answer=await generate(compiled,controller.signal);
-      await assistant.context(req.user,req.body.context,req.body.draft);
-      if(!controller.signal.aborted)res.json({mode:'live',...answer,context:compiled.context,
+      if(editing)await prepareEdit(assistant,req.user,req.body);
+      else await assistant.context(req.user,req.body.context,req.body.draft);
+      if(!controller.signal.aborted&&editing)res.json({mode:'live',model:answer.model,suggestion:parseEdit(answer,req.body.draft)});
+      else if(!controller.signal.aborted)res.json({mode:'live',...answer,context:compiled.context,
         request:{task:req.body.task||'general',message:compiled.message,history:compiled.history,context:compiled.context}});
     } catch(error) {
       if(!controller.signal.aborted){
