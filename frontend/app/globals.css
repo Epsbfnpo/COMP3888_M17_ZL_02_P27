@@ -1901,12 +1901,21 @@ a.entity-back-link:focus-visible, .entity-actions-panel :is(button,a):focus-visi
 .ai-panel { position: absolute; bottom: 72px; right: 0; display: flex; flex-direction: column; width: 420px; height: min(660px, calc(100dvh - 126px)); overflow: hidden; border: 1px solid #cbd4c5; border-radius: 20px; background: #faf8f0; box-shadow: 0 22px 70px #142b2529, 0 3px 10px #142b2512; }
 .ai-panel[hidden] { display: none; }
 .ai-context-options { font-size: 11px; }
-.editor-ai-suggestion { margin: 14px 0; }
-.editor-ai-suggestion > details { padding: 12px 14px; border: 1px solid #cbd6c4; border-radius: 10px; background: #f1f3e9; }
-.editor-ai-suggestion summary { cursor: pointer; font-weight: 600; color: #244b38; }
-.editor-ai-suggestion details > label { margin-top: 12px; }
-.editor-ai-suggestion details > p, .editor-ai-suggestion > p { font-size: 12px; color: #526351; }
-.editor-ai-suggestion details > button { margin-right: 8px; }
+.editor-ai-suggestion { min-width: 0; margin: 14px 0; }
+.editor-ai-suggestion > details { padding: 18px 20px; border: 1px solid #cbd6c4; border-radius: 10px; background: #f1f3e9; }
+.editor-ai-suggestion summary { cursor: pointer; font-weight: 600; color: #244b38; line-height: 1.5; }
+.editor-ai-content { display: grid; gap: 10px; min-width: 0; margin-top: 18px; padding-top: 16px; border-top: 1px solid #dce2d6; }
+.editor-ai-content > label { display: block; margin: 0; font-size: 14px; }
+.editor-ai-content > textarea { display: block; box-sizing: border-box; width: 100%; min-width: 0; min-height: 108px; margin: 0; padding: 12px 14px; border-radius: 8px; background: #fffef9; line-height: 1.6; resize: vertical; }
+.editor-ai-content > p, .editor-ai-suggestion > p { margin: 0; font-size: 12px; line-height: 1.6; color: #526351; }
+.editor-ai-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; }
+.editor-ai-actions > button { margin: 0; padding: 12px 18px; line-height: 1.4; }
+.editor-ai-suggestion :is(summary,textarea,button):focus-visible { outline: 3px solid #ad793a; outline-offset: 3px; }
+.editor-ai-suggestion > p[role="status"] { margin-top: 12px; }
+@media (max-width: 600px) {
+  .editor-ai-suggestion > details { padding: 16px; }
+  .editor-ai-actions > button { width: 100%; }
+}
 .ai-context-body { max-height: 170px; overflow-y: auto; overscroll-behavior: contain; padding-top: 8px; }
 .ai-context-body[hidden] { display: none; }
 .ai-widget .ai-context-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; color: #244b38; text-align: left; cursor: pointer; }

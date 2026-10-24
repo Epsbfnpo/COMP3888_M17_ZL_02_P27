@@ -36,12 +36,16 @@ export default function EditorAISuggestion({draft,disabled=false,onApply}:{draft
   }
   return <div className="editor-ai-suggestion">
     <details><summary>Suggest a body edit with AI</summary>
+      <div className="editor-ai-content">
       <label htmlFor={id}>What should change?</label>
-      <textarea id={id} rows={2} maxLength={2000} value={instruction} disabled={disabled||pending} placeholder="Improve clarity while preserving all established facts." onChange={e=>setInstruction(e.target.value)}/>
-      <p>Sending shares this draft and accessible world context with Google. Nothing is saved.</p>
-      <button type="button" disabled={disabled||pending||!instruction.trim()||draft.content.body.text.length>6000} onClick={()=>void generate()}>{pending?'Generating…':error?'Retry suggestion':'Generate suggestion'}</button>
+      <textarea id={id} aria-describedby={`${id}-hint`} rows={3} maxLength={2000} value={instruction} disabled={disabled||pending} placeholder="Improve clarity while preserving all established facts." onChange={e=>setInstruction(e.target.value)}/>
+      <p id={`${id}-hint`}>Sending shares this draft and accessible world context with Google. Nothing is saved.</p>
       {draft.content.body.text.length>6000&&<p>Body editing supports up to 6,000 characters.</p>}
+      <div className="editor-ai-actions">
+      <button type="button" disabled={disabled||pending||!instruction.trim()||draft.content.body.text.length>6000} onClick={()=>void generate()}>{pending?'Generating…':error?'Retry suggestion':'Generate suggestion'}</button>
       {pending&&<button type="button" className="secondary-button" onClick={()=>request.current?.abort()}>Cancel request</button>}
+      </div>
+      </div>
     </details>
     {(suggestion||pending||error)&&<EditSuggestionPreview suggestion={suggestion} loading={pending} error={error} stale={stale} disabled={disabled} onDismiss={()=>{setSuggestion(null);setError('');setNotice('Suggestion dismissed. Your draft is unchanged.');}} onApply={next=>{
       if(disabled||pending||stale)return;
