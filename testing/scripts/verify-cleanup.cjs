@@ -1,0 +1,4 @@
+const path=require('node:path'),fs=require('node:fs');const root=path.resolve(__dirname,'../..');
+require(path.join(root,'backend/node_modules/dotenv')).config({path:path.join(root,'backend/.env'),quiet:true});
+const mysql=require(path.join(root,'backend/node_modules/mysql2/promise'));
+(async()=>{const c=await mysql.createConnection({host:process.env.DB_HOST,user:process.env.DB_USER,password:process.env.DB_PASSWORD,port:+process.env.DB_PORT||3306});try{const [rows]=await c.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME REGEXP '^wb_(quality|permissions|browser)_test_[0-9]+$'");const record={checked:new Date().toISOString(),remainingTestSchemas:rows.map(r=>r.SCHEMA_NAME),clean:rows.length===0};fs.writeFileSync(path.join(root,'testing/evidence/database-cleanup-verification.json'),JSON.stringify(record,null,2));console.log(JSON.stringify(record));}finally{await c.end();}})().catch(e=>{console.error(e.code||e.message);process.exitCode=1;});

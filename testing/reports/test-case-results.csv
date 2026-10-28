@@ -1,0 +1,89 @@
+﻿layer,case,result,duration_seconds,evidence,source
+Backend,Q01 registration required fields and 50/51 username boundary,PASS,0.125446,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,Q02 registration duplicate email and 100/101 email boundary,PASS,0.153809,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,"Q03 login rejects missing, unknown and incorrect credentials",PASS,0.079155,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,Q04 successful login uses HttpOnly cookie and server session,PASS,0.078432,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,"Q05 profile denies guests, other accounts and invalid fields",PASS,0.089075,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,Q06 profile rejects duplicates and saves own profile with current password,PASS,0.161288,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,Q07 session rotation revokes old token; expired token is rejected,PASS,0.153090,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,"Q08 malformed JSON, non-JSON, untrusted Origin and oversized request",PASS,0.015631,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,Q09 world creation defaults private; invalid visibility and blank name rejected,PASS,0.022797,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,"Q10 keyword/tag search respects visibility, no-result and literal SQL-like input",PASS,0.039389,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,Q11 entity name 150/151 boundary and stale writes preserve state,PASS,0.026735,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,Q12 transaction rollback leaves no entity on invalid relationship target,PASS,0.005383,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,Q13 logout invalidates token and malformed session is anonymous,PASS,0.007937,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,Q14 registration API rejects a malformed email address,FAIL,0.073490,evidence/backend.junit.xml,test/account-quality.test.js
+Backend,"missing, empty and non-string credentials are rejected without exposing values",PASS,0.001048,evidence/backend.junit.xml,test/ai-config.test.js
+Backend,reads only the server-side Gemini variable and trims surrounding whitespace,PASS,0.000108,evidence/backend.junit.xml,test/ai-config.test.js
+Backend,reads current environment values without caching credentials,PASS,0.000747,evidence/backend.junit.xml,test/ai-config.test.js
+Backend,"body edit rejects stale baseline, stale proposal and oversized input before generation",PASS,0.001056,evidence/backend.junit.xml,test/assistant-edit.test.js
+Backend,model cannot supply original text or version and malformed replacements are rejected,PASS,0.000422,evidence/backend.junit.xml,test/assistant-edit.test.js
+Backend,body edit returns a preview with server-owned original text and never accepts malformed edits,PASS,0.158374,evidence/backend.junit.xml,test/assistant-http.test.js
+Backend,"HTTP auth, context, live response and in-flight permission revocation",PASS,0.039156,evidence/backend.junit.xml,test/assistant-http.test.js
+Backend,opt-in real Gemini HTTP smoke with synthetic context,SKIP,0.000132,evidence/backend.junit.xml,test/assistant-http.test.js
+Backend,opt-in real Gemini body edit produces a complete validated replacement,SKIP,0.000139,evidence/backend.junit.xml,test/assistant-http.test.js
+Backend,opt-in unsaved draft consistency check with a selected published reference,SKIP,0.000059,evidence/backend.junit.xml,test/assistant-http.test.js
+Backend,validates reference IDs and bounds their number,PASS,0.001676,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,"world context includes its description, published entities and their relationships by default",PASS,0.003378,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,world entity and relationship options are independent and manual references survive opt-out,PASS,0.000275,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,inaccessible worlds fail before loading entities or relationships,PASS,0.003051,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,loads direct neighbour summaries and prioritises selected references,PASS,0.000636,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,"rejects unavailable, deleted or cross-world explicitly selected references",PASS,0.000172,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,respects neighbour opt-out and body exclusion,PASS,0.000153,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,"search is authenticated, world scoped, parameterised and excludes drafts",PASS,0.004242,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,unsaved content is separate from its current published baseline and marks stale base,PASS,0.000507,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,readers and context mismatches cannot submit unsaved draft context,PASS,0.000234,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,"proposal snapshot requires editable ownership, preserves baseline and reports revision changes",PASS,0.000229,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,bounds long draft bodies and marks truncation rather than hiding it,PASS,0.000102,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,"includes all direct neighbours beyond the previous three, five and twenty limits",PASS,0.000229,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,search returns intermediate entities and selection submits the same published chain,PASS,0.000311,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,"shortest paths handle reverse traversal, cycles, self and disconnected entities",PASS,0.000142,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,large graphs report incomplete path coverage and do not assert disconnection,PASS,0.007666,evidence/backend.junit.xml,test/assistant-references.test.js
+Backend,shared prompt defaults to English and preserves grounding and direction rules,PASS,0.001229,evidence/backend.junit.xml,test/assistant.test.js
+Backend,"validates task, prompt length and bounded non-system history",PASS,0.000381,evidence/backend.junit.xml,test/assistant.test.js
+Backend,rejects malformed context selectors and flags,PASS,0.000134,evidence/backend.junit.xml,test/assistant.test.js
+Backend,requires authentication even for conversation without context,PASS,0.000735,evidence/backend.junit.xml,test/assistant.test.js
+Backend,rechecks entity access and never fetches relationships after denial,PASS,0.000220,evidence/backend.junit.xml,test/assistant.test.js
+Backend,uses saved version and explicitly whitelists world fields,PASS,0.000383,evidence/backend.junit.xml,test/assistant.test.js
+Backend,excluded body and relationships are not submitted or queried,PASS,0.000137,evidence/backend.junit.xml,test/assistant.test.js
+Backend,bounds entity content and reports truncation,PASS,0.000131,evidence/backend.junit.xml,test/assistant.test.js
+Backend,world context can opt out of automatic published entities,PASS,0.000087,evidence/backend.junit.xml,test/assistant.test.js
+Backend,proposal context delegates to the existing proposal access guard,PASS,0.000237,evidence/backend.junit.xml,test/assistant.test.js
+Backend,compiles templates and history without any provider request or writes,PASS,0.001403,evidence/backend.junit.xml,test/assistant.test.js
+Backend,"B01 AI prompt length boundaries 0, 1, 1999, 2000, 2001",PASS,0.001970,evidence/backend.junit.xml,test/boundary-quality.test.js
+Backend,"B02 explicit references boundary 4, 5, 6 and deduplication",PASS,0.000553,evidence/backend.junit.xml,test/boundary-quality.test.js
+Backend,"B03 history 7/8/9 messages, 3999/4000/4001 characters and total budget",PASS,0.000223,evidence/backend.junit.xml,test/boundary-quality.test.js
+Backend,B04 body edit input 5999/6000/6001 and replacement 11999/12000/12001,PASS,0.002649,evidence/backend.junit.xml,test/boundary-quality.test.js
+Backend,F01 registration database failure returns safe 500,PASS,0.051545,evidence/backend.junit.xml,test/failure-quality.test.js
+Backend,F02 login database failure returns safe 500,PASS,0.008378,evidence/backend.junit.xml,test/failure-quality.test.js
+Backend,F03 content query failure returns generic error,PASS,0.006565,evidence/backend.junit.xml,test/failure-quality.test.js
+Backend,F04 concurrent duplicate registration error maps to 409,PASS,0.002914,evidence/backend.junit.xml,test/failure-quality.test.js
+Backend,F05 failed transaction rolls back and releases connection,PASS,0.000481,evidence/backend.junit.xml,test/failure-quality.test.js
+Backend,F06 successful transaction commits and releases connection,PASS,0.000086,evidence/backend.junit.xml,test/failure-quality.test.js
+Backend,provider sends tested model and shared instructions without putting key in URL or body,PASS,0.002090,evidence/backend.junit.xml,test/gemini.test.js
+Backend,missing configuration and upstream errors return safe messages only,PASS,0.000573,evidence/backend.junit.xml,test/gemini.test.js
+Backend,"network, malformed, empty and blocked responses are handled safely",PASS,0.000257,evidence/backend.junit.xml,test/gemini.test.js
+Backend,supports cancellation and server timeout without automatic paid retries,PASS,0.009435,evidence/backend.junit.xml,test/gemini.test.js
+Backend,bounds replies so the next conversation turn remains valid,PASS,0.000545,evidence/backend.junit.xml,test/gemini.test.js
+Backend,edit mode preserves complete long replacements and rejects token-truncated output,PASS,0.000344,evidence/backend.junit.xml,test/gemini.test.js
+Backend,"usage guard enforces concurrent and per-minute limits, resets, and bounds memory",PASS,0.000240,evidence/backend.junit.xml,test/gemini.test.js
+Backend,world access and proposal lifecycle,PASS,3.084048,evidence/backend.junit.xml,test/permissions.test.js
+Backend,custom relationship labels preserve case and punctuation without domain mappings,PASS,0.001213,evidence/backend.junit.xml,test/relationship-names.test.js
+Backend,two-way labels can match or differ; null returns to one-way,PASS,0.000094,evidence/backend.junit.xml,test/relationship-names.test.js
+Backend,reject malformed names and case-insensitive duplicate links,PASS,0.000229,evidence/backend.junit.xml,test/relationship-names.test.js
+Browser,N01 observe 60 local reads at concurrency five without claiming a production SLA,PASSED,0.445,evidence/browser-results.json,observations.spec.cjs
+Browser,"UI01 register mismatch, successful account creation and duplicate rejection",PASSED,1.802,evidence/browser-results.json,workflows.spec.cjs
+Browser,"UI02 login failure, keyboard password visibility and profile update",PASSED,1.587,evidence/browser-results.json,workflows.spec.cjs
+Browser,"UI03 guest/reader controls, private world exclusion and published reverse relationship",PASSED,1.876,evidence/browser-results.json,workflows.spec.cjs
+Browser,UI04 author proposal submission and owner approval publish exact content,PASSED,3.418,evidence/browser-results.json,workflows.spec.cjs
+Browser,"UI05 stale proposal preserves local input, compares and explicitly recovers",PASSED,1.603,evidence/browser-results.json,workflows.spec.cjs
+Browser,UI06 same-tab refresh restores unsaved proposal without publishing,PASSED,1.603,evidence/browser-results.json,workflows.spec.cjs
+Browser,"UI07 owner edits, compares history and restores as a newer version",PASSED,1.917,evidence/browser-results.json,workflows.spec.cjs
+Browser,UI08 AI missing configuration gives disabled composer without changing published content,PASSED,1.328,evidence/browser-results.json,workflows.spec.cjs
+Browser,"UI09 mocked AI edit diff, dismiss, apply, stale protection and explicit save",PASSED,1.85,evidence/browser-results.json,workflows.spec.cjs
+Browser,"UI10 draft snapshot stale warning, refresh and mocked chat failure/retry",PASSED,1.601,evidence/browser-results.json,workflows.spec.cjs
+Browser,UI11 revoked membership removes stale editor and retains copyable unsaved input,PASSED,2.329,evidence/browser-results.json,workflows.spec.cjs
+Browser,UI12 search match/no result and small-screen accessibility observations,PASSED,1.474,evidence/browser-results.json,workflows.spec.cjs
+Live provider retest,opt-in real Gemini HTTP smoke with synthetic context,PASS,2.097115,evidence/live-ai-success-summary.json,backend/test/assistant-http.test.js
+Live provider retest,opt-in real Gemini body edit produces a complete validated replacement,PASS,2.696185,evidence/live-ai-success-summary.json,backend/test/assistant-http.test.js
+Live provider retest,opt-in unsaved draft consistency check with a selected published reference,PASS,3.922767,evidence/live-ai-success-summary.json,backend/test/assistant-http.test.js

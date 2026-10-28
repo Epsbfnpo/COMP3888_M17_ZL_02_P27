@@ -1,0 +1,40 @@
+{
+  "recorded": "2026-10-26T11:16:52.750586+00:00",
+  "model": "gemini-3.8-flash",
+  "source": "backend/test/assistant-http.test.js",
+  "cases": [
+    {
+      "name": "body edit returns a preview with server-owned original text and never accepts malformed edits",
+      "result": "PASS",
+      "seconds": 0.134888,
+      "realProvider": false
+    },
+    {
+      "name": "HTTP auth, context, live response and in-flight permission revocation",
+      "result": "PASS",
+      "seconds": 0.018294,
+      "realProvider": false
+    },
+    {
+      "name": "opt-in real Gemini HTTP smoke with synthetic context",
+      "result": "PASS",
+      "seconds": 2.097115,
+      "realProvider": true
+    },
+    {
+      "name": "opt-in real Gemini body edit produces a complete validated replacement",
+      "result": "PASS",
+      "seconds": 2.696185,
+      "realProvider": true
+    },
+    {
+      "name": "opt-in unsaved draft consistency check with a selected published reference",
+      "result": "PASS",
+      "seconds": 3.922767,
+      "realProvider": true
+    }
+  ],
+  "realProviderCalls": 3,
+  "applicationDataModified": false,
+  "scope": "Single synthetic trial per live scenario; not a comprehensive quality assessment"
+}

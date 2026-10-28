@@ -1,0 +1,8 @@
+const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),cp=require('node:child_process');
+const {chromium}=require('@playwright/test');const dir=path.resolve(__dirname,'../reports'),name='Live_AI_Successful_Retest_20261026';
+const markdown=fs.readFileSync(path.join(dir,name+'.md'),'utf8');
+const r=cp.spawnSync('pandoc',['-f','gfm','-t','html5','-s','--metadata','title=Live Gemini Verification'],{input:markdown,encoding:'utf8'});
+if(r.status!==0)throw new Error(r.stderr);
+const css='@page{size:A4;margin:17mm}html{font-size:11px;background:white}body{font-family:Arial,sans-serif;font-size:11px;line-height:1.4;max-width:none;margin:0;padding:0;color:#24342e}h1{font-size:24px;color:#173e33}h2{font-size:15px;color:#173e33;margin-top:15px;border-bottom:1px solid #d4b975;padding-bottom:4px}table{display:table;width:100%;border-collapse:collapse;font-size:10px}td,th{padding:6px;border:1px solid #cbd6ce}th{background:#e7eee8}tr{break-inside:avoid}code{font-size:9px}pre{white-space:pre-wrap}#title-block-header{display:none}';
+fs.writeFileSync(path.join(dir,name+'.html'),r.stdout.replace('</head>','<style>'+css+'</style></head>'));
+(async()=>{const local=path.join(os.homedir(),'Library/Caches/ms-playwright/chromium-1194/chrome-mac/Chromium.app/Contents/MacOS/Chromium');const b=await chromium.launch(fs.existsSync(local)?{executablePath:local}:{});try{const page=await b.newPage();await page.goto('file://'+path.join(dir,name+'.html'));await page.pdf({path:path.join(dir,name+'.pdf'),format:'A4',printBackground:true});console.log('Successful live-AI retest PDF generated.');}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

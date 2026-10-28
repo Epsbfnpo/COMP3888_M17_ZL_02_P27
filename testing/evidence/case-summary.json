@@ -1,0 +1,13 @@
+{
+  "Backend": {
+    "FAIL": 1,
+    "PASS": 68,
+    "SKIP": 3
+  },
+  "Browser": {
+    "PASSED": 13
+  },
+  "Live provider retest": {
+    "PASS": 3
+  }
+}

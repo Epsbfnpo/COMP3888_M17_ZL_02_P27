@@ -1,0 +1,12 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const {spawnSync}=require('node:child_process');
+const root=path.resolve(__dirname,'../..');
+const evidence=path.join(root,'testing/evidence');fs.mkdirSync(evidence,{recursive:true});
+const tests=fs.readdirSync(path.join(root,'backend/test')).filter(n=>n.endsWith('.test.js')).sort().map(n=>'test/'+n);
+const args=[require.resolve('c8/bin/c8.js'),'--all','--include=*.js','--exclude=test/**','--exclude=scripts/**','--reporter=text','--reporter=html','--reporter=json-summary','--reporter=json','--reporter=lcov','--reports-dir='+path.join(root,'testing/coverage'),'--temp-directory='+path.join(root,'testing/coverage/tmp'),process.execPath,'--test','--test-reporter=tap','--test-reporter-destination='+path.join(evidence,'backend.tap'),'--test-reporter=junit','--test-reporter-destination='+path.join(evidence,'backend.junit.xml'),...tests];
+const started=new Date().toISOString();
+const result=spawnSync(process.execPath,args,{cwd:path.join(root,'backend'),encoding:'utf8',env:{...process.env,AI_LIVE_SMOKE:'0',AI_LIVE_EDIT_SMOKE:'0'}});
+fs.writeFileSync(path.join(evidence,'backend-coverage.log'),(result.stdout||'')+(result.stderr||''));
+fs.writeFileSync(path.join(evidence,'backend-run.json'),JSON.stringify({started,finished:new Date().toISOString(),node:process.version,platform:process.platform,command:[process.execPath,...args],exitCode:result.status,liveProviderEnabled:false},null,2));
+process.stdout.write(result.stdout||'');process.stderr.write(result.stderr||'');process.exitCode=result.status??1;

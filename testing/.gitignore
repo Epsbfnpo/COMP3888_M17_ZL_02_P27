@@ -1,0 +1,23 @@
+# Installed dependencies and generated local test output.
+/node_modules/
+/SUBMISSION.md
+/test-results/
+/playwright-report/
+/coverage/
+
+# Raw logs, traces, synthetic session fixtures, machine paths and debug runs
+# remain local. Only explicitly selected, portable summaries are shared.
+/evidence/*
+!/evidence/verification-summary.json
+!/evidence/case-summary.json
+!/evidence/live-ai-success-summary.json
+!/evidence/database-cleanup-verification.json
+
+# Keep editable report source, PDFs and CSV; HTML can be regenerated locally.
+/reports/*.html
+/reports/report-preview.png
+/reports/report-page-*.png
+
+# Superseded connection-troubleshooting notes stay local. The main report and
+# successful live retest report contain the final verified outcome.
+/reports/Live_AI_Test_Addendum_20261026.md

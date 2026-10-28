@@ -1,0 +1,14 @@
+{
+  "name": "worldbuilding-verification",
+  "private": true,
+  "scripts": {
+    "test:backend": "node scripts/run-backend.cjs",
+    "test:browser": "playwright test",
+    "report": "node scripts/report.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@axe-core/playwright": "4.10.2",
+    "c8": "10.1.3"
+  }
+}
