@@ -9,6 +9,7 @@ const security = require('./security');
 const app = express();
 const port = Number(process.env.PORT) || 3001;
 const saltRounds = 10;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 app.use(cors({ origin: security.origin, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
@@ -46,6 +47,10 @@ app.post('/register', async (req, res) => {
     return res.status(400).json({
       error: 'Username or email is too long',
     });
+  }
+
+  if (!emailPattern.test(email)) {
+    return res.status(400).json({ error: 'Please enter a valid email address' });
   }
 
   try {
@@ -164,8 +169,6 @@ app.put('/api/users/:id/profile', async (req, res) => {
       error: 'Username or email is too long',
     });
   }
-
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailPattern.test(email)) {
     return res.status(400).json({
