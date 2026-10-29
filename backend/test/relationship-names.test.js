@@ -1,10 +1,10 @@
-const { test, after } = require('node:test');
+const { test } = require('node:test');
 const assert = require('node:assert/strict');
+// Normalization is pure. security.js imports db.js transitively; prevent a unit
+// test from opening the configured application database merely on import.
+const dbPath = require.resolve('../db');
+require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {} };
 const { normalizeRelationships } = require('../relationships');
-after(async () => {
-  const db = require('../db');
-  try { await db.query('SELECT 1'); } finally { await db.end(); }
-});
 const row = { targetEntityId: 1, type: '  Works   with & supports  ', description: '' };
 
 test('custom relationship labels preserve case and punctuation without domain mappings', () => {
