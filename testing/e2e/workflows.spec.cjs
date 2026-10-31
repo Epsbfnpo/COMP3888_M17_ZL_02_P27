@@ -110,5 +110,7 @@ test('UI12 search match/no result and small-screen accessibility observations',a
   await info.attach('accessibility-observations',{body:JSON.stringify({overflow,violations:accessibility.violations},null,2),contentType:'application/json'});
   fs.writeFileSync(path.join(__dirname,'../evidence/accessibility-observations.json'),JSON.stringify({scope:'390x844 login page only',overflow,violations:accessibility.violations},null,2));
   // Observational audit: findings are reported; this does not certify WCAG compliance.
+  const labelContrastFailures=accessibility.violations.filter(v=>v.id==='color-contrast').flatMap(v=>v.nodes).filter(n=>n.target.some(selector=>typeof selector==='string'&&selector.includes('.step-label')));
+  expect(labelContrastFailures).toHaveLength(0);
   expect(overflow.scroll).toBeLessThanOrEqual(overflow.viewport+1);await evidence(page,info,'mobile-login');
 });
