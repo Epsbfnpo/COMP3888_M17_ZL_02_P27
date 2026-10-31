@@ -1,0 +1,327 @@
+case,operation,visibility,subject,expected,actual,status,state_unchanged_when_denied,result
+M01-read-world,"Read world",private,guest,deny,deny,404,n/a,PASS
+M01-read-world,"Read world",private,outsider,deny,deny,404,n/a,PASS
+M01-read-world,"Read world",private,pending,deny,deny,404,n/a,PASS
+M01-read-world,"Read world",private,former,deny,deny,404,n/a,PASS
+M01-read-world,"Read world",private,reader,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",private,author,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",private,manager,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",private,owner,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",public,guest,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",public,outsider,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",public,pending,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",public,former,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",public,reader,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",public,author,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",public,manager,allow,allow,200,n/a,PASS
+M01-read-world,"Read world",public,owner,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",private,guest,deny,deny,404,n/a,PASS
+M02-read-entity,"Read entity",private,outsider,deny,deny,404,n/a,PASS
+M02-read-entity,"Read entity",private,pending,deny,deny,404,n/a,PASS
+M02-read-entity,"Read entity",private,former,deny,deny,404,n/a,PASS
+M02-read-entity,"Read entity",private,reader,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",private,author,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",private,manager,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",private,owner,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",public,guest,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",public,outsider,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",public,pending,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",public,former,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",public,reader,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",public,author,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",public,manager,allow,allow,200,n/a,PASS
+M02-read-entity,"Read entity",public,owner,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",private,guest,deny,deny,200,n/a,PASS
+M03-search-entity,"Find entity in search",private,outsider,deny,deny,200,n/a,PASS
+M03-search-entity,"Find entity in search",private,pending,deny,deny,200,n/a,PASS
+M03-search-entity,"Find entity in search",private,former,deny,deny,200,n/a,PASS
+M03-search-entity,"Find entity in search",private,reader,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",private,author,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",private,manager,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",private,owner,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",public,guest,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",public,outsider,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",public,pending,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",public,former,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",public,reader,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",public,author,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",public,manager,allow,allow,200,n/a,PASS
+M03-search-entity,"Find entity in search",public,owner,allow,allow,200,n/a,PASS
+M04-view-history,"View entity version history",private,guest,deny,deny,401,n/a,PASS
+M04-view-history,"View entity version history",private,outsider,deny,deny,404,n/a,PASS
+M04-view-history,"View entity version history",private,pending,deny,deny,404,n/a,PASS
+M04-view-history,"View entity version history",private,former,deny,deny,404,n/a,PASS
+M04-view-history,"View entity version history",private,reader,deny,deny,403,n/a,PASS
+M04-view-history,"View entity version history",private,author,allow,allow,200,n/a,PASS
+M04-view-history,"View entity version history",private,manager,allow,allow,200,n/a,PASS
+M04-view-history,"View entity version history",private,owner,allow,allow,200,n/a,PASS
+M04-view-history,"View entity version history",public,guest,deny,deny,401,n/a,PASS
+M04-view-history,"View entity version history",public,outsider,deny,deny,403,n/a,PASS
+M04-view-history,"View entity version history",public,pending,deny,deny,403,n/a,PASS
+M04-view-history,"View entity version history",public,former,deny,deny,403,n/a,PASS
+M04-view-history,"View entity version history",public,reader,deny,deny,403,n/a,PASS
+M04-view-history,"View entity version history",public,author,allow,allow,200,n/a,PASS
+M04-view-history,"View entity version history",public,manager,allow,allow,200,n/a,PASS
+M04-view-history,"View entity version history",public,owner,allow,allow,200,n/a,PASS
+M05-rollback,"Restore an earlier version",private,guest,deny,deny,401,true,PASS
+M05-rollback,"Restore an earlier version",private,outsider,deny,deny,404,true,PASS
+M05-rollback,"Restore an earlier version",private,pending,deny,deny,404,true,PASS
+M05-rollback,"Restore an earlier version",private,former,deny,deny,404,true,PASS
+M05-rollback,"Restore an earlier version",private,reader,deny,deny,403,true,PASS
+M05-rollback,"Restore an earlier version",private,author,deny,deny,403,true,PASS
+M05-rollback,"Restore an earlier version",private,manager,allow,allow,200,n/a,PASS
+M05-rollback,"Restore an earlier version",private,owner,allow,allow,200,n/a,PASS
+M05-rollback,"Restore an earlier version",public,guest,deny,deny,401,true,PASS
+M05-rollback,"Restore an earlier version",public,outsider,deny,deny,403,true,PASS
+M05-rollback,"Restore an earlier version",public,pending,deny,deny,403,true,PASS
+M05-rollback,"Restore an earlier version",public,former,deny,deny,403,true,PASS
+M05-rollback,"Restore an earlier version",public,reader,deny,deny,403,true,PASS
+M05-rollback,"Restore an earlier version",public,author,deny,deny,403,true,PASS
+M05-rollback,"Restore an earlier version",public,manager,allow,allow,200,n/a,PASS
+M05-rollback,"Restore an earlier version",public,owner,allow,allow,200,n/a,PASS
+M06-create-entity,"Directly create entity",private,guest,deny,deny,401,true,PASS
+M06-create-entity,"Directly create entity",private,outsider,deny,deny,404,true,PASS
+M06-create-entity,"Directly create entity",private,pending,deny,deny,404,true,PASS
+M06-create-entity,"Directly create entity",private,former,deny,deny,404,true,PASS
+M06-create-entity,"Directly create entity",private,reader,deny,deny,403,true,PASS
+M06-create-entity,"Directly create entity",private,author,deny,deny,403,true,PASS
+M06-create-entity,"Directly create entity",private,manager,deny,deny,403,true,PASS
+M06-create-entity,"Directly create entity",private,owner,allow,allow,201,n/a,PASS
+M06-create-entity,"Directly create entity",public,guest,deny,deny,401,true,PASS
+M06-create-entity,"Directly create entity",public,outsider,deny,deny,403,true,PASS
+M06-create-entity,"Directly create entity",public,pending,deny,deny,403,true,PASS
+M06-create-entity,"Directly create entity",public,former,deny,deny,403,true,PASS
+M06-create-entity,"Directly create entity",public,reader,deny,deny,403,true,PASS
+M06-create-entity,"Directly create entity",public,author,deny,deny,403,true,PASS
+M06-create-entity,"Directly create entity",public,manager,deny,deny,403,true,PASS
+M06-create-entity,"Directly create entity",public,owner,allow,allow,201,n/a,PASS
+M07-update-entity,"Directly update entity",private,guest,deny,deny,401,true,PASS
+M07-update-entity,"Directly update entity",private,outsider,deny,deny,404,true,PASS
+M07-update-entity,"Directly update entity",private,pending,deny,deny,404,true,PASS
+M07-update-entity,"Directly update entity",private,former,deny,deny,404,true,PASS
+M07-update-entity,"Directly update entity",private,reader,deny,deny,403,true,PASS
+M07-update-entity,"Directly update entity",private,author,deny,deny,403,true,PASS
+M07-update-entity,"Directly update entity",private,manager,deny,deny,403,true,PASS
+M07-update-entity,"Directly update entity",private,owner,allow,allow,200,n/a,PASS
+M07-update-entity,"Directly update entity",public,guest,deny,deny,401,true,PASS
+M07-update-entity,"Directly update entity",public,outsider,deny,deny,403,true,PASS
+M07-update-entity,"Directly update entity",public,pending,deny,deny,403,true,PASS
+M07-update-entity,"Directly update entity",public,former,deny,deny,403,true,PASS
+M07-update-entity,"Directly update entity",public,reader,deny,deny,403,true,PASS
+M07-update-entity,"Directly update entity",public,author,deny,deny,403,true,PASS
+M07-update-entity,"Directly update entity",public,manager,deny,deny,403,true,PASS
+M07-update-entity,"Directly update entity",public,owner,allow,allow,200,n/a,PASS
+M08-delete-entity,"Directly delete entity",private,guest,deny,deny,401,true,PASS
+M08-delete-entity,"Directly delete entity",private,outsider,deny,deny,404,true,PASS
+M08-delete-entity,"Directly delete entity",private,pending,deny,deny,404,true,PASS
+M08-delete-entity,"Directly delete entity",private,former,deny,deny,404,true,PASS
+M08-delete-entity,"Directly delete entity",private,reader,deny,deny,403,true,PASS
+M08-delete-entity,"Directly delete entity",private,author,deny,deny,403,true,PASS
+M08-delete-entity,"Directly delete entity",private,manager,deny,deny,403,true,PASS
+M08-delete-entity,"Directly delete entity",private,owner,allow,allow,200,n/a,PASS
+M08-delete-entity,"Directly delete entity",public,guest,deny,deny,401,true,PASS
+M08-delete-entity,"Directly delete entity",public,outsider,deny,deny,403,true,PASS
+M08-delete-entity,"Directly delete entity",public,pending,deny,deny,403,true,PASS
+M08-delete-entity,"Directly delete entity",public,former,deny,deny,403,true,PASS
+M08-delete-entity,"Directly delete entity",public,reader,deny,deny,403,true,PASS
+M08-delete-entity,"Directly delete entity",public,author,deny,deny,403,true,PASS
+M08-delete-entity,"Directly delete entity",public,manager,deny,deny,403,true,PASS
+M08-delete-entity,"Directly delete entity",public,owner,allow,allow,200,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",private,guest,deny,deny,401,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",private,outsider,deny,deny,404,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",private,pending,deny,deny,404,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",private,former,deny,deny,404,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",private,reader,deny,deny,403,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",private,author,allow,allow,200,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",private,manager,allow,allow,200,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",private,owner,allow,allow,200,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",public,guest,deny,deny,401,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",public,outsider,deny,deny,403,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",public,pending,deny,deny,403,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",public,former,deny,deny,403,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",public,reader,deny,deny,403,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",public,author,allow,allow,200,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",public,manager,allow,allow,200,n/a,PASS
+M09-submit-proposal,"Save and submit a proposal",public,owner,allow,allow,200,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",private,guest,deny,deny,401,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",private,outsider,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",private,pending,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",private,former,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",private,reader,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",private,author,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",private,manager,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",private,owner,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",public,guest,deny,deny,401,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",public,outsider,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",public,pending,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",public,former,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",public,reader,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",public,author,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",public,manager,deny,deny,404,n/a,PASS
+M10-read-others-draft,"Read another member's unsubmitted draft",public,owner,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",private,guest,deny,deny,401,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",private,outsider,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",private,pending,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",private,former,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",private,reader,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",private,author,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",private,manager,allow,allow,200,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",private,owner,allow,allow,200,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",public,guest,deny,deny,401,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",public,outsider,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",public,pending,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",public,former,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",public,reader,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",public,author,deny,deny,404,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",public,manager,allow,allow,200,n/a,PASS
+M11-read-submitted-proposal,"Read another Author's submitted proposal",public,owner,allow,allow,200,n/a,PASS
+M12-review-author-proposal,"Review another Author's proposal",private,guest,deny,deny,401,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",private,outsider,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",private,pending,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",private,former,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",private,reader,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",private,author,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",private,manager,allow,allow,200,n/a,PASS
+M12-review-author-proposal,"Review another Author's proposal",private,owner,allow,allow,200,n/a,PASS
+M12-review-author-proposal,"Review another Author's proposal",public,guest,deny,deny,401,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",public,outsider,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",public,pending,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",public,former,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",public,reader,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",public,author,deny,deny,404,true,PASS
+M12-review-author-proposal,"Review another Author's proposal",public,manager,allow,allow,200,n/a,PASS
+M12-review-author-proposal,"Review another Author's proposal",public,owner,allow,allow,200,n/a,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",private,guest,deny,deny,401,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",private,outsider,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",private,pending,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",private,former,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",private,reader,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",private,author,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",private,manager,deny,deny,403,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",private,owner,allow,allow,200,n/a,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",public,guest,deny,deny,401,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",public,outsider,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",public,pending,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",public,former,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",public,reader,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",public,author,deny,deny,404,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",public,manager,deny,deny,403,true,PASS
+M13-review-manager-proposal,"Review a Manager's proposal",public,owner,allow,allow,200,n/a,PASS
+M14-review-own-proposal,"Review own proposal",private,author,deny,deny,403,true,PASS
+M14-review-own-proposal,"Review own proposal",private,manager,deny,deny,403,true,PASS
+M14-review-own-proposal,"Review own proposal",private,owner,deny,deny,403,true,PASS
+M14-review-own-proposal,"Review own proposal",public,author,deny,deny,403,true,PASS
+M14-review-own-proposal,"Review own proposal",public,manager,deny,deny,403,true,PASS
+M14-review-own-proposal,"Review own proposal",public,owner,deny,deny,403,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",private,guest,deny,deny,401,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",private,outsider,deny,deny,404,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",private,pending,deny,deny,404,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",private,former,deny,deny,404,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",private,reader,deny,deny,403,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",private,author,deny,deny,403,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",private,manager,allow,allow,200,n/a,PASS
+M15-manage-reader-author,"Add a Reader or Author",private,owner,allow,allow,200,n/a,PASS
+M15-manage-reader-author,"Add a Reader or Author",public,guest,deny,deny,401,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",public,outsider,deny,deny,403,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",public,pending,deny,deny,403,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",public,former,deny,deny,403,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",public,reader,deny,deny,403,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",public,author,deny,deny,403,true,PASS
+M15-manage-reader-author,"Add a Reader or Author",public,manager,allow,allow,200,n/a,PASS
+M15-manage-reader-author,"Add a Reader or Author",public,owner,allow,allow,200,n/a,PASS
+M16-assign-manager,"Assign a Manager",private,guest,deny,deny,401,true,PASS
+M16-assign-manager,"Assign a Manager",private,outsider,deny,deny,404,true,PASS
+M16-assign-manager,"Assign a Manager",private,pending,deny,deny,404,true,PASS
+M16-assign-manager,"Assign a Manager",private,former,deny,deny,404,true,PASS
+M16-assign-manager,"Assign a Manager",private,reader,deny,deny,403,true,PASS
+M16-assign-manager,"Assign a Manager",private,author,deny,deny,403,true,PASS
+M16-assign-manager,"Assign a Manager",private,manager,deny,deny,403,true,PASS
+M16-assign-manager,"Assign a Manager",private,owner,allow,allow,200,n/a,PASS
+M16-assign-manager,"Assign a Manager",public,guest,deny,deny,401,true,PASS
+M16-assign-manager,"Assign a Manager",public,outsider,deny,deny,403,true,PASS
+M16-assign-manager,"Assign a Manager",public,pending,deny,deny,403,true,PASS
+M16-assign-manager,"Assign a Manager",public,former,deny,deny,403,true,PASS
+M16-assign-manager,"Assign a Manager",public,reader,deny,deny,403,true,PASS
+M16-assign-manager,"Assign a Manager",public,author,deny,deny,403,true,PASS
+M16-assign-manager,"Assign a Manager",public,manager,deny,deny,403,true,PASS
+M16-assign-manager,"Assign a Manager",public,owner,allow,allow,200,n/a,PASS
+M17-change-visibility,"Change world visibility",private,guest,deny,deny,401,true,PASS
+M17-change-visibility,"Change world visibility",private,outsider,deny,deny,404,true,PASS
+M17-change-visibility,"Change world visibility",private,pending,deny,deny,404,true,PASS
+M17-change-visibility,"Change world visibility",private,former,deny,deny,404,true,PASS
+M17-change-visibility,"Change world visibility",private,reader,deny,deny,403,true,PASS
+M17-change-visibility,"Change world visibility",private,author,deny,deny,403,true,PASS
+M17-change-visibility,"Change world visibility",private,manager,deny,deny,403,true,PASS
+M17-change-visibility,"Change world visibility",private,owner,allow,allow,200,n/a,PASS
+M17-change-visibility,"Change world visibility",public,guest,deny,deny,401,true,PASS
+M17-change-visibility,"Change world visibility",public,outsider,deny,deny,403,true,PASS
+M17-change-visibility,"Change world visibility",public,pending,deny,deny,403,true,PASS
+M17-change-visibility,"Change world visibility",public,former,deny,deny,403,true,PASS
+M17-change-visibility,"Change world visibility",public,reader,deny,deny,403,true,PASS
+M17-change-visibility,"Change world visibility",public,author,deny,deny,403,true,PASS
+M17-change-visibility,"Change world visibility",public,manager,deny,deny,403,true,PASS
+M17-change-visibility,"Change world visibility",public,owner,allow,allow,200,n/a,PASS
+M18-transfer-world,"Transfer world ownership",private,guest,deny,deny,401,true,PASS
+M18-transfer-world,"Transfer world ownership",private,outsider,deny,deny,404,true,PASS
+M18-transfer-world,"Transfer world ownership",private,pending,deny,deny,404,true,PASS
+M18-transfer-world,"Transfer world ownership",private,former,deny,deny,404,true,PASS
+M18-transfer-world,"Transfer world ownership",private,reader,deny,deny,403,true,PASS
+M18-transfer-world,"Transfer world ownership",private,author,deny,deny,403,true,PASS
+M18-transfer-world,"Transfer world ownership",private,manager,deny,deny,403,true,PASS
+M18-transfer-world,"Transfer world ownership",private,owner,allow,allow,200,n/a,PASS
+M18-transfer-world,"Transfer world ownership",public,guest,deny,deny,401,true,PASS
+M18-transfer-world,"Transfer world ownership",public,outsider,deny,deny,403,true,PASS
+M18-transfer-world,"Transfer world ownership",public,pending,deny,deny,403,true,PASS
+M18-transfer-world,"Transfer world ownership",public,former,deny,deny,403,true,PASS
+M18-transfer-world,"Transfer world ownership",public,reader,deny,deny,403,true,PASS
+M18-transfer-world,"Transfer world ownership",public,author,deny,deny,403,true,PASS
+M18-transfer-world,"Transfer world ownership",public,manager,deny,deny,403,true,PASS
+M18-transfer-world,"Transfer world ownership",public,owner,allow,allow,200,n/a,PASS
+M19-delete-world,"Delete world",private,guest,deny,deny,401,true,PASS
+M19-delete-world,"Delete world",private,outsider,deny,deny,404,true,PASS
+M19-delete-world,"Delete world",private,pending,deny,deny,404,true,PASS
+M19-delete-world,"Delete world",private,former,deny,deny,404,true,PASS
+M19-delete-world,"Delete world",private,reader,deny,deny,403,true,PASS
+M19-delete-world,"Delete world",private,author,deny,deny,403,true,PASS
+M19-delete-world,"Delete world",private,manager,deny,deny,403,true,PASS
+M19-delete-world,"Delete world",private,owner,allow,allow,200,n/a,PASS
+M19-delete-world,"Delete world",public,guest,deny,deny,401,true,PASS
+M19-delete-world,"Delete world",public,outsider,deny,deny,403,true,PASS
+M19-delete-world,"Delete world",public,pending,deny,deny,403,true,PASS
+M19-delete-world,"Delete world",public,former,deny,deny,403,true,PASS
+M19-delete-world,"Delete world",public,reader,deny,deny,403,true,PASS
+M19-delete-world,"Delete world",public,author,deny,deny,403,true,PASS
+M19-delete-world,"Delete world",public,manager,deny,deny,403,true,PASS
+M19-delete-world,"Delete world",public,owner,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",private,guest,deny,deny,401,n/a,PASS
+M20-ai-context,"Load AI context for the world",private,outsider,deny,deny,404,n/a,PASS
+M20-ai-context,"Load AI context for the world",private,pending,deny,deny,404,n/a,PASS
+M20-ai-context,"Load AI context for the world",private,former,deny,deny,404,n/a,PASS
+M20-ai-context,"Load AI context for the world",private,reader,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",private,author,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",private,manager,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",private,owner,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",public,guest,deny,deny,401,n/a,PASS
+M20-ai-context,"Load AI context for the world",public,outsider,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",public,pending,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",public,former,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",public,reader,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",public,author,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",public,manager,allow,allow,200,n/a,PASS
+M20-ai-context,"Load AI context for the world",public,owner,allow,allow,200,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",private,guest,deny,deny,401,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",private,outsider,deny,deny,404,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",private,pending,deny,deny,404,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",private,former,deny,deny,404,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",private,reader,deny,deny,403,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",private,author,allow,allow,200,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",private,manager,allow,allow,200,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",private,owner,allow,allow,200,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",public,guest,deny,deny,401,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",public,outsider,deny,deny,403,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",public,pending,deny,deny,403,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",public,former,deny,deny,403,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",public,reader,deny,deny,403,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",public,author,allow,allow,200,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",public,manager,allow,allow,200,n/a,PASS
+M21-ai-draft-check,"AI consistency check with an unsaved draft",public,owner,allow,allow,200,n/a,PASS

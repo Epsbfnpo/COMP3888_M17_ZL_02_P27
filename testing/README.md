@@ -9,6 +9,8 @@ for dependencies, test-database permissions and execution commands.
 - `../backend/test/`: Node unit, boundary and API/integration tests.
 - `e2e/workflows.spec.cjs`: browser account, collaboration, history and AI workflows.
 - `e2e/observations.spec.cjs`: a small local read workload.
+- `e2e/supplementary.spec.cjs`: UI restore, role-dependent controls, AI panel safety and a ten-page accessibility scan.
+- `scripts/ai-evaluation.cjs`: opt-in, paid repeated evaluation of real Gemini replies.
 - `test-plan/TEST_PLAN.md`: acceptance themes, techniques and planned quality evaluation.
 
 The database-backed suites create isolated temporary schemas. The browser runner
@@ -40,6 +42,7 @@ Do not force-add environment files or session fixtures to Git.
 - [26 October test report](reports/Worldbuilding_Test_Report_20261026.pdf)
 - [Editable report source](reports/Worldbuilding_Test_Report_20261026.md)
 - [Separate real-provider retest](reports/Live_AI_Successful_Retest_20261026.pdf)
+- [31 October supplementary tests](reports/supplementary-20261031/README.md): permission matrix, AI safety and quality evaluation, accessibility scan and contrast fix
 - [Recorded case results](reports/test-case-results.csv)
 
 These files and the portable summaries in `evidence/` describe the recorded
