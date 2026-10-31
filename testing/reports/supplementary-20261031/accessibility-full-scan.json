@@ -1,0 +1,62 @@
+{
+  "scanned": "2026-10-31T03:43:16.817Z",
+  "tool": "axe-core 4.10.2 via @axe-core/playwright",
+  "tags": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21aa"
+  ],
+  "viewport": "1440x1000",
+  "pages": [
+    {
+      "page": "Home",
+      "url": "/home",
+      "violations": []
+    },
+    {
+      "page": "World",
+      "url": "/worlds/1",
+      "violations": []
+    },
+    {
+      "page": "Workspace",
+      "url": "/worlds/1/workspace",
+      "violations": []
+    },
+    {
+      "page": "Entity",
+      "url": "/entities/1",
+      "violations": []
+    },
+    {
+      "page": "History",
+      "url": "/entities/1/history",
+      "violations": []
+    },
+    {
+      "page": "Proposal editor",
+      "url": "/proposals/1",
+      "violations": []
+    },
+    {
+      "page": "Search",
+      "url": "/search?q=Harbour",
+      "violations": []
+    },
+    {
+      "page": "Profile",
+      "url": "/profile",
+      "violations": []
+    },
+    {
+      "page": "Sign in",
+      "url": "/",
+      "violations": []
+    },
+    {
+      "page": "Register",
+      "url": "/register",
+      "violations": []
+    }
+  ]
+}

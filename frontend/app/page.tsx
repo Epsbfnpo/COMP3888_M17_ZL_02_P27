@@ -6,9 +6,6 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const DEMO_EMAIL = "demo@example.com";
-const DEMO_PASSWORD = "Demo123!";
-
 type LoginResult = {
   message?: string;
   error?: string;
@@ -27,12 +24,6 @@ export default function Home() {
   const [result, setResult] = useState<LoginResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  function useDemoAccount() {
-    setEmail(DEMO_EMAIL);
-    setPassword(DEMO_PASSWORD);
-    setResult(null);
-  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -156,18 +147,6 @@ export default function Home() {
           <Link href="/register">Create an account</Link>
         </div>
 
-        <div className="demo-note">
-          <strong>Explore with a demo account</strong>
-          <span>Two created worlds and one world joined as an author.</span>
-          <span>{DEMO_EMAIL} / {DEMO_PASSWORD}</span>
-          <button
-            type="button"
-            className="demo-account-button"
-            onClick={useDemoAccount}
-          >
-            Use demo account
-          </button>
-        </div>
       </section>
     </main>
   );

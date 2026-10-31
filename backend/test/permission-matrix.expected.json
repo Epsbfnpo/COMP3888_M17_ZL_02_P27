@@ -1,0 +1,35 @@
+{
+  "source": "docs/PERMISSIONS.md role table and text; AI rules from docs/AI_ASSISTANT.md",
+  "subjects": ["guest", "outsider", "pending", "former", "reader", "author", "manager", "owner"],
+  "notes": {
+    "guest": "Not signed in",
+    "outsider": "Signed in, never a member of this world",
+    "pending": "Membership exists with status pending (not approved)",
+    "former": "Approved Author who was then removed",
+    "allow": "Request succeeds (2xx); for search, the entity appears in results",
+    "deny": "Request is refused (401, 403 or 404) and no content changes"
+  },
+  "operations": {
+    "M01-read-world": { "label": "Read world", "private": ["reader", "author", "manager", "owner"], "public": "everyone" },
+    "M02-read-entity": { "label": "Read entity", "private": ["reader", "author", "manager", "owner"], "public": "everyone" },
+    "M03-search-entity": { "label": "Find entity in search", "private": ["reader", "author", "manager", "owner"], "public": "everyone" },
+    "M04-view-history": { "label": "View entity version history", "private": ["author", "manager", "owner"], "public": ["author", "manager", "owner"] },
+    "M05-rollback": { "label": "Restore an earlier version", "private": ["manager", "owner"], "public": ["manager", "owner"] },
+    "M06-create-entity": { "label": "Directly create entity", "private": ["owner"], "public": ["owner"] },
+    "M07-update-entity": { "label": "Directly update entity", "private": ["owner"], "public": ["owner"] },
+    "M08-delete-entity": { "label": "Directly delete entity", "private": ["owner"], "public": ["owner"] },
+    "M09-submit-proposal": { "label": "Save and submit a proposal", "private": ["author", "manager", "owner"], "public": ["author", "manager", "owner"] },
+    "M10-read-others-draft": { "label": "Read another member's unsubmitted draft", "private": [], "public": [] },
+    "M11-read-submitted-proposal": { "label": "Read another Author's submitted proposal", "private": ["manager", "owner"], "public": ["manager", "owner"] },
+    "M12-review-author-proposal": { "label": "Review another Author's proposal", "private": ["manager", "owner"], "public": ["manager", "owner"] },
+    "M13-review-manager-proposal": { "label": "Review a Manager's proposal", "private": ["owner"], "public": ["owner"] },
+    "M14-review-own-proposal": { "label": "Review own proposal", "subjects": ["author", "manager", "owner"], "private": [], "public": [] },
+    "M15-manage-reader-author": { "label": "Add a Reader or Author", "private": ["manager", "owner"], "public": ["manager", "owner"] },
+    "M16-assign-manager": { "label": "Assign a Manager", "private": ["owner"], "public": ["owner"] },
+    "M17-change-visibility": { "label": "Change world visibility", "private": ["owner"], "public": ["owner"] },
+    "M18-transfer-world": { "label": "Transfer world ownership", "private": ["owner"], "public": ["owner"] },
+    "M19-delete-world": { "label": "Delete world", "private": ["owner"], "public": ["owner"] },
+    "M20-ai-context": { "label": "Load AI context for the world", "private": ["reader", "author", "manager", "owner"], "public": ["outsider", "pending", "former", "reader", "author", "manager", "owner"] },
+    "M21-ai-draft-check": { "label": "AI consistency check with an unsaved draft", "private": ["author", "manager", "owner"], "public": ["author", "manager", "owner"] }
+  }
+}
