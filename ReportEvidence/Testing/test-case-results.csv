@@ -1,0 +1,95 @@
+﻿layer,case,result,seconds,evidence
+Backend,Q01 registration required fields and 50/51 username boundary,PASS,0.131105,evidence/backend.junit.xml
+Backend,Q02 registration duplicate email and 100/101 email boundary,PASS,0.148006,evidence/backend.junit.xml
+Backend,"Q03 login rejects missing, unknown and incorrect credentials",PASS,0.087612,evidence/backend.junit.xml
+Backend,Q04 successful login uses HttpOnly cookie and server session,PASS,0.083057,evidence/backend.junit.xml
+Backend,"Q05 profile denies guests, other accounts and invalid fields",PASS,0.107566,evidence/backend.junit.xml
+Backend,Q06 profile rejects duplicates and saves own profile with current password,PASS,0.155485,evidence/backend.junit.xml
+Backend,Q07 session rotation revokes old token; expired token is rejected,PASS,0.138718,evidence/backend.junit.xml
+Backend,"Q08 malformed JSON, non-JSON, untrusted Origin and oversized request",PASS,0.077669,evidence/backend.junit.xml
+Backend,Q09 world creation defaults private; invalid visibility and blank name rejected,PASS,0.058804,evidence/backend.junit.xml
+Backend,"Q10 keyword/tag search respects visibility, no-result and literal SQL-like input",PASS,0.082745,evidence/backend.junit.xml
+Backend,Q11 entity name 150/151 boundary and stale writes preserve state,PASS,0.065567,evidence/backend.junit.xml
+Backend,Q12 transaction rollback leaves no entity on invalid relationship target,PASS,0.013300,evidence/backend.junit.xml
+Backend,Q13 logout invalidates token and malformed session is anonymous,PASS,0.044032,evidence/backend.junit.xml
+Backend,Q14 registration API rejects a malformed email address,PASS,0.004065,evidence/backend.junit.xml
+Backend,"missing, empty and non-string credentials are rejected without exposing values",PASS,0.002871,evidence/backend.junit.xml
+Backend,reads only the server-side Gemini variable and trims surrounding whitespace,PASS,0.000552,evidence/backend.junit.xml
+Backend,reads current environment values without caching credentials,PASS,0.000314,evidence/backend.junit.xml
+Backend,"body edit rejects stale baseline, stale proposal and oversized input before generation",PASS,0.001691,evidence/backend.junit.xml
+Backend,model cannot supply original text or version and malformed replacements are rejected,PASS,0.000652,evidence/backend.junit.xml
+Backend,body edit returns a preview with server-owned original text and never accepts malformed edits,PASS,0.490416,evidence/backend.junit.xml
+Backend,"HTTP auth, context, live response and in-flight permission revocation",PASS,0.057072,evidence/backend.junit.xml
+Backend,opt-in real Gemini HTTP smoke with synthetic context,SKIP,0.000166,evidence/backend.junit.xml
+Backend,opt-in real Gemini body edit produces a complete validated replacement,SKIP,0.000058,evidence/backend.junit.xml
+Backend,opt-in unsaved draft consistency check with a selected published reference,SKIP,0.000026,evidence/backend.junit.xml
+Backend,validates reference IDs and bounds their number,PASS,0.001581,evidence/backend.junit.xml
+Backend,"world context includes its description, published entities and their relationships by default",PASS,0.002719,evidence/backend.junit.xml
+Backend,world entity and relationship options are independent and manual references survive opt-out,PASS,0.000917,evidence/backend.junit.xml
+Backend,inaccessible worlds fail before loading entities or relationships,PASS,0.001234,evidence/backend.junit.xml
+Backend,loads direct neighbour summaries and prioritises selected references,PASS,0.000893,evidence/backend.junit.xml
+Backend,"rejects unavailable, deleted or cross-world explicitly selected references",PASS,0.000522,evidence/backend.junit.xml
+Backend,respects neighbour opt-out and body exclusion,PASS,0.000465,evidence/backend.junit.xml
+Backend,"search is authenticated, world scoped, parameterised and excludes drafts",PASS,0.000705,evidence/backend.junit.xml
+Backend,unsaved content is separate from its current published baseline and marks stale base,PASS,0.002268,evidence/backend.junit.xml
+Backend,readers and context mismatches cannot submit unsaved draft context,PASS,0.001028,evidence/backend.junit.xml
+Backend,"proposal snapshot requires editable ownership, preserves baseline and reports revision changes",PASS,0.000503,evidence/backend.junit.xml
+Backend,bounds long draft bodies and marks truncation rather than hiding it,PASS,0.000139,evidence/backend.junit.xml
+Backend,"includes all direct neighbours beyond the previous three, five and twenty limits",PASS,0.000273,evidence/backend.junit.xml
+Backend,search returns intermediate entities and selection submits the same published chain,PASS,0.000485,evidence/backend.junit.xml
+Backend,"shortest paths handle reverse traversal, cycles, self and disconnected entities",PASS,0.000349,evidence/backend.junit.xml
+Backend,large graphs report incomplete path coverage and do not assert disconnection,PASS,0.009622,evidence/backend.junit.xml
+Backend,shared prompt defaults to English and preserves grounding and direction rules,PASS,0.003078,evidence/backend.junit.xml
+Backend,"validates task, prompt length and bounded non-system history",PASS,0.000783,evidence/backend.junit.xml
+Backend,rejects malformed context selectors and flags,PASS,0.000245,evidence/backend.junit.xml
+Backend,requires authentication even for conversation without context,PASS,0.000915,evidence/backend.junit.xml
+Backend,rechecks entity access and never fetches relationships after denial,PASS,0.000438,evidence/backend.junit.xml
+Backend,uses saved version and explicitly whitelists world fields,PASS,0.000496,evidence/backend.junit.xml
+Backend,excluded body and relationships are not submitted or queried,PASS,0.000199,evidence/backend.junit.xml
+Backend,bounds entity content and reports truncation,PASS,0.000226,evidence/backend.junit.xml
+Backend,world context can opt out of automatic published entities,PASS,0.000195,evidence/backend.junit.xml
+Backend,proposal context delegates to the existing proposal access guard,PASS,0.000265,evidence/backend.junit.xml
+Backend,compiles templates and history without any provider request or writes,PASS,0.000395,evidence/backend.junit.xml
+Backend,"B01 AI prompt length boundaries 0, 1, 1999, 2000, 2001",PASS,0.001944,evidence/backend.junit.xml
+Backend,"B02 explicit references boundary 4, 5, 6 and deduplication",PASS,0.000968,evidence/backend.junit.xml
+Backend,"B03 history 7/8/9 messages, 3999/4000/4001 characters and total budget",PASS,0.001555,evidence/backend.junit.xml
+Backend,B04 body edit input 5999/6000/6001 and replacement 11999/12000/12001,PASS,0.001176,evidence/backend.junit.xml
+Backend,F01 registration database failure returns safe 500,PASS,0.055305,evidence/backend.junit.xml
+Backend,F02 login database failure returns safe 500,PASS,0.006827,evidence/backend.junit.xml
+Backend,F03 content query failure returns generic error,PASS,0.011705,evidence/backend.junit.xml
+Backend,F04 concurrent duplicate registration error maps to 409,PASS,0.004048,evidence/backend.junit.xml
+Backend,F05 failed transaction rolls back and releases connection,PASS,0.001069,evidence/backend.junit.xml
+Backend,F06 successful transaction commits and releases connection,PASS,0.000260,evidence/backend.junit.xml
+Backend,provider sends tested model and shared instructions without putting key in URL or body,PASS,0.002685,evidence/backend.junit.xml
+Backend,missing configuration and upstream errors return safe messages only,PASS,0.000715,evidence/backend.junit.xml
+Backend,"network, malformed, empty and blocked responses are handled safely",PASS,0.000420,evidence/backend.junit.xml
+Backend,supports cancellation and server timeout without automatic paid retries,PASS,0.006891,evidence/backend.junit.xml
+Backend,bounds replies so the next conversation turn remains valid,PASS,0.000554,evidence/backend.junit.xml
+Backend,edit mode preserves complete long replacements and rejects token-truncated output,PASS,0.000773,evidence/backend.junit.xml
+Backend,"usage guard enforces concurrent and per-minute limits, resets, and bounds memory",PASS,0.000811,evidence/backend.junit.xml
+Backend,world access and proposal lifecycle,PASS,4.896312,evidence/backend.junit.xml
+Backend,malformed email returns 400 without querying or inserting users,PASS,0.112132,evidence/backend.junit.xml
+Backend,required fields and email length retain their validation,PASS,0.047573,evidence/backend.junit.xml
+Backend,valid email is normalized and password is hashed,PASS,0.094323,evidence/backend.junit.xml
+Backend,duplicate account remains a conflict and valid login issues a session,PASS,0.075852,evidence/backend.junit.xml
+Backend,profile rejects the same malformed address without updating the account,PASS,0.017383,evidence/backend.junit.xml
+Backend,email at the 100-character limit remains accepted,PASS,0.061109,evidence/backend.junit.xml
+Backend,custom relationship labels preserve case and punctuation without domain mappings,PASS,0.001608,evidence/backend.junit.xml
+Backend,two-way labels can match or differ; null returns to one-way,PASS,0.000171,evidence/backend.junit.xml
+Backend,reject malformed names and case-insensitive duplicate links,PASS,0.000311,evidence/backend.junit.xml
+Live provider retest,opt-in real Gemini HTTP smoke with synthetic context,PASS,3.291611,evidence/live-ai-20261029.junit.xml
+Live provider retest,opt-in real Gemini body edit produces a complete validated replacement,PASS,3.375444,evidence/live-ai-20261029.junit.xml
+Live provider retest,opt-in unsaved draft consistency check with a selected published reference,PASS,5.155727,evidence/live-ai-20261029.junit.xml
+Browser,N01 observe 60 local reads at concurrency five without claiming a production SLA,PASS,0.187,evidence/browser-results.json
+Browser,"UI01 register mismatch, successful account creation and duplicate rejection",PASS,4.876,evidence/browser-results.json
+Browser,"UI02 login failure, keyboard password visibility and profile update",PASS,2.466,evidence/browser-results.json
+Browser,"UI03 guest/reader controls, private world exclusion and published reverse relationship",PASS,2.71,evidence/browser-results.json
+Browser,UI04 author proposal submission and owner approval publish exact content,PASS,4.48,evidence/browser-results.json
+Browser,"UI05 stale proposal preserves local input, compares and explicitly recovers",PASS,2.237,evidence/browser-results.json
+Browser,UI06 same-tab refresh restores unsaved proposal without publishing,PASS,2.16,evidence/browser-results.json
+Browser,"UI07 owner edits, compares history and restores as a newer version",PASS,2.357,evidence/browser-results.json
+Browser,UI08 AI missing configuration gives disabled composer without changing published content,PASS,1.968,evidence/browser-results.json
+Browser,"UI09 mocked AI edit diff, dismiss, apply, stale protection and explicit save",PASS,2.84,evidence/browser-results.json
+Browser,"UI10 draft snapshot stale warning, refresh and mocked chat failure/retry",PASS,2.273,evidence/browser-results.json
+Browser,UI11 revoked membership removes stale editor and retains copyable unsaved input,PASS,3.725,evidence/browser-results.json
+Browser,UI12 search match/no result and small-screen accessibility observations,PASS,2.007,evidence/browser-results.json

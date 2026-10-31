@@ -1,0 +1,35 @@
+{
+  "description": "Five real Gemini requests made while recording the classroom demonstration video on 30 October 2026 (synthetic Greyhaven Coast world). Single runs; not scored.",
+  "requests": [
+    {
+      "route": "/api/ai/chat",
+      "model": "gemini-3.8-flash",
+      "seconds": 2.718,
+      "reply": "**Established Setting:**  \nGreyhaven Coast is a maritime region governed by working ports and strict navigation rules. The Harbour Council enforces regulations and storm closures for Greyhaven Harbour, which permits entry solely during daylight. The Moonwake Convoy ships grain and medical supplies there, adhering strictly to harbour notices. Further details regarding coastal geography or broader administration are not established in the supplied context."
+    },
+    {
+      "route": "/api/ai/chat",
+      "model": "gemini-3.8-flash",
+      "seconds": 4.346,
+      "reply": "### Findings\n\n* **Draft passage:**\n  > \"Under a permanent agreement with the Harbour Council, the convoy may enter at midnight and during storm warnings without checking harbour notices.\"\n* **Related entity:** Greyhaven Harbour (ID: 145, published version 1)\n* **Relevant supplied text:**\n  > \"Greyhaven Harbour admits vessels only between sunrise and sunset. During storm warnings, the harbour entrance remains closed. All arriving vessels must check harbour notices before entry. Merchant convoys receive no exemption from these restrictions.\"\n* **Classification:** Clear conflict.\n  The draft's claim of midnight entry, access during storm warnings, and bypassing harbour notices directly contradicts the absolute rules of Greyhaven Harbour, which specifically state that merchant convoys receive no exemption from daylight-only entry, storm closures, or mandatory notice checks.\n* **Suggested minimal repair:**\n  Align the convoy's entry terms with harbour regulations by removing the exemptions:\n  > *\"Under an agreement with the Harbour Council, the convoy plans scheduled arrivals between sunrise and sunset, holding outside the entrance during storm warnings and checking harbour notices before entry.\"*\n\n***\n\n### Checked Scope & Limitations\n* **Checked entities:** Moonwake Convoy (ID: 147, baseline v1 / draft snapshot), Greyhaven Harbour (ID: 145, v1).\n* **Limitations:** The whole world was not checked. Findings are based solely on the supplied snapshot and direct reference context."
+    },
+    {
+      "route": "/api/ai/chat",
+      "model": "gemini-3.8-flash",
+      "seconds": 3.695,
+      "reply": "**Phrases not fitting the style:**\n1. \"unmatched value\"\n2. \"premium shipping solutions\"\n3. \"world-class service\"\n\n**Revision plan:**\n* **Remove advertising language:** Delete the final paragraph containing marketing claims and superlatives.\n* **Preserve harbour compliance:** Retain the second paragraph detailing daylight arrivals (between sunrise and sunset), checking harbour notices before entry, and waiting offshore during storm closures.\n* **Preserve cargo details:** Keep the established first paragraph stating that the convoy delivers grain and medical supplies to Greyhaven Harbour."
+    },
+    {
+      "route": "/api/ai/edit-body",
+      "model": "gemini-3.8-flash",
+      "seconds": 2.841,
+      "suggestion": "The Moonwake Convoy carries grain and medical supplies to Greyhaven Harbour.\n\nIts captains plan arrivals between sunrise and sunset, check harbour notices before entry, and wait offshore during storm closures.\n\nThe convoy maintains regular cargo runs on these routes, transporting provisions and medical stores under standard maritime charter."
+    },
+    {
+      "route": "/api/ai/edit-body",
+      "model": "gemini-3.8-flash",
+      "seconds": 2.644,
+      "suggestion": "The Moonwake Convoy carries grain and medical supplies to Greyhaven Harbour.\n\nIts captains plan arrivals between sunrise and sunset, check harbour notices before entry, and wait offshore during storm closures.\n\nVessels transport grain sacks and packed medical crates directly to coastal quays according to scheduled sailings.\n\nEach shipment is recorded in the convoy's cargo ledger."
+    }
+  ]
+}
